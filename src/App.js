@@ -111,7 +111,7 @@ const App = () => {
   };
 
   const handlePrint = () => {
-    window.print();
+    window.electronAPI.printToPDF();
   };
 
   const handleSave = () => {
