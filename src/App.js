@@ -1,14 +1,15 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react"; // useEffect 추가
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkHtml from "remark-html";
 import remarkGfm from "remark-gfm";
-import { Save, Import, Printer, FileDown } from "lucide-react";
+import { Save, Import, FileOutput, Printer, FileDown } from "lucide-react";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify"; // 추가
 import remarkRehype from "remark-rehype"; // 추가
 import Editor from "@monaco-editor/react";
+import Preview from "./components/Preview";
 
 // 용지 크기 정의 (mm 단위)
 const PAPER_SIZES = {
