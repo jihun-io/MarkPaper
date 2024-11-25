@@ -3,7 +3,7 @@ import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkHtml from "remark-html";
 import remarkGfm from "remark-gfm";
-import { Printer, FileDown } from "lucide-react";
+import { Save, Import, Printer, FileDown } from "lucide-react";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify"; // 추가
@@ -124,6 +124,24 @@ const App = () => {
     document.body.removeChild(a);
   };
 
+  const handleLoad = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".md";
+    input.onchange = async (event) => {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const text = e.target.result;
+        setMarkdown(text);
+        const newHtml = await convertToHtml(text);
+        setHtml(newHtml);
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
   const getDpi = () => {
     return 96 * window.devicePixelRatio;
   };
@@ -154,7 +172,14 @@ const App = () => {
             </option>
           ))}
         </select>
-        <button onClick={handleSave}>저장</button>
+        <button onClick={handleSave} className="flex items-center gap-2">
+          <Save className="w-4 h-4" />
+          저장
+        </button>
+        <button onClick={handleLoad} className="flex items-center gap-2">
+          <Import className="w-4 h-4" />
+          불러오기
+        </button>
         <button onClick={handlePrint} className="flex items-center gap-2">
           <Printer className="w-4 h-4" />
           인쇄
