@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "main": "public/electron.js",
+  "homepage": "./",
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
     "@tailwindcss/typography": "^0.5.15",
@@ -62,6 +63,52 @@
     "@craco/craco": "^7.1.0",
     "electron": "^33.2.0",
     "tailwindcss": "^3.4.15",
-    "wait-on": "^8.0.1"
+    "wait-on": "^8.0.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "extends": null,
+    "appId": "io.jihun.markpaper.electron",
+    "productName": "MarkPaper",
+    "files": [
+      "build/**/*",
+      "assets/**/*",
+      "public/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist"
+    },
+    "mac": {
+      "icon": "assets/icons/mac/icon_512x512@2x.icns",
+      "category": "public.app-category.utilities",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
+      "identity": "Jihun Kim (62494T7ZTJ)"
+    },
+    "afterSign": "./scripts/notarize.js",
+    "win": {
+      "icon": "assets/icons/windows/icon.ico",
+      "extraResources": [
+        {
+          "from": "assets",
+          "to": "assets",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ]
+    },
+    "asar": true,
+    "asarUnpack": [
+      "assets/**/*",
+      "build/assets/**/*"
+    ]
   }
 }
