@@ -25,20 +25,22 @@ app.on("ready", () => {
   }
 });
 
-ipcMain.on("print-to-pdf", (event) => {
+ipcMain.handle("print-to-pdf", async () => {
   const pdfPath = path.join(app.getPath("documents"), "print.pdf");
-  mainWindow.webContents
-    .printToPDF({})
-    .then((data) => {
-      fs.writeFile(pdfPath, data, (error) => {
-        if (error) throw error;
-        const pdfWindow = new BrowserWindow({ width: 800, height: 600 });
-        pdfWindow.loadURL("file://" + pdfPath);
-      });
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+
+  try {
+    const data = await mainWindow.webContents.printToPDF({});
+    await fs.writeFile(pdfPath, data);
+
+    const pdfWindow = new BrowserWindow({ width: 800, height: 600 });
+    pdfWindow.title = "인쇄 및 저장";
+    pdfWindow.loadURL("file://" + pdfPath);
+
+    return { success: true, path: pdfPath };
+  } catch (error) {
+    console.error("PDF 생성 실패:", error);
+    return { success: false, error: error.message };
+  }
 });
 
 ipcMain.handle("save-file", async (event, filePath, content) => {
