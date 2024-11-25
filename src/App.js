@@ -249,7 +249,7 @@ const App = () => {
           .page-break {
             height: 0;
             page-break-after: always;
-            margin: 1rem 0;
+            margin: 2rem 0;
             border-top: 1px dashed #999;
           }
         }
