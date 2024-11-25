@@ -122,15 +122,33 @@ const App = () => {
     }
   }, [filePath, markdown]);
 
+  const handlePrint = useCallback(() => {
+    window.electronAPI.printToPDF();
+  }, []);
+
+  // 단축 키 관련 코드
   useEffect(() => {
     const handleKeyDown = (event) => {
+      if (!isOpened) return; // 문서가 열려있지 않으면 무시
+
       const isMac = /Mac|iPod|iPhone|iPad/.test(window.navigator.platform);
+
+      // Save 단축키
       if (
-        (isMac && event.metaKey && !event.ctrlKey && event.key === "s") ||
-        (!isMac && event.ctrlKey && !event.metaKey && event.key === "s")
+        (isMac && event.metaKey && event.key === "s") ||
+        (!isMac && event.ctrlKey && event.key === "s")
       ) {
         event.preventDefault();
         handleSave();
+      }
+
+      // Print 단축키
+      if (
+        (isMac && event.metaKey && event.key === "p") ||
+        (!isMac && event.ctrlKey && event.key === "p")
+      ) {
+        event.preventDefault();
+        handlePrint();
       }
     };
 
@@ -138,7 +156,7 @@ const App = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [handleSave]);
+  }, [handleSave, handlePrint, isOpened]); // isOpened 추가
 
   useEffect(() => {
     if (isOpened) {
@@ -162,10 +180,6 @@ const App = () => {
     const newHtml = await convertToHtml(value);
     setHtml(newHtml);
     setIsModified(true);
-  };
-
-  const handlePrint = () => {
-    window.electronAPI.printToPDF();
   };
 
   const handleOutput = async () => {
