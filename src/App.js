@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkHtml from "remark-html";
@@ -107,6 +107,37 @@ const App = () => {
   const previewRef = useRef(null);
   const editorRef = useRef(null);
 
+  const handleSave = useCallback(async () => {
+    if (filePath) {
+      console.log("저장 경로:", filePath);
+      try {
+        await window.electronAPI.saveFile(filePath, markdown);
+      } catch (error) {
+        console.error("파일 저장 실패:", error);
+      }
+    } else {
+      handleOutput();
+    }
+  }, [filePath, markdown]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      const isMac = /Mac|iPod|iPhone|iPad/.test(window.navigator.platform);
+      if (
+        (isMac && event.metaKey && !event.ctrlKey && event.key === "s") ||
+        (!isMac && event.ctrlKey && !event.metaKey && event.key === "s")
+      ) {
+        event.preventDefault();
+        handleSave();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleSave]);
+
   useEffect(() => {
     if (isOpened) {
       // isOpened가 true일 때만 실행될 코드
@@ -132,19 +163,6 @@ const App = () => {
 
   const handlePrint = () => {
     window.electronAPI.printToPDF();
-  };
-
-  const handleSave = async () => {
-    if (filePath) {
-      console.log("저장 경로:", filePath);
-      try {
-        await window.electronAPI.saveFile(filePath, markdown);
-      } catch (error) {
-        console.error("파일 저장 실패:", error);
-      }
-    } else {
-      handleOutput();
-    }
   };
 
   const handleOutput = async () => {
