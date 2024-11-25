@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
@@ -11,6 +11,7 @@ app.on("ready", () => {
     webPreferences: {
       nodeIntegration: true,
       preload: path.join(__dirname, "preload.js"),
+      enableRemoteModule: true,
     },
   });
 
@@ -38,6 +39,18 @@ ipcMain.on("print-to-pdf", (event) => {
     .catch((error) => {
       console.log(error);
     });
+});
+
+ipcMain.handle("save-file", async (event, filePath, content) => {
+  await fs.promises.writeFile(filePath, content);
+});
+
+ipcMain.handle("dialog:showSave", async (event, options) => {
+  const result = await dialog.showSaveDialog({
+    defaultPath: options.defaultPath,
+    filters: options.filters,
+  });
+  return result;
 });
 
 app.on("window-all-closed", () => {
