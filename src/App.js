@@ -142,18 +142,6 @@ const App = () => {
     input.click();
   };
 
-  const getDpi = () => {
-    return 96 * window.devicePixelRatio;
-  };
-
-  // mm를 px로 변환 (실제 디바이스 DPI 기준)
-  const mmToPx = (mm) => {
-    const dpi = getDpi();
-    // 1mm = 1/25.4 inch
-    // 1inch = dpi pixels
-    return Math.round((mm * dpi) / 25.4);
-  };
-
   const currentPaperSize = PAPER_SIZES[paperSize];
   const paperWidth = currentPaperSize.width;
   const paperHeight = currentPaperSize.height;
