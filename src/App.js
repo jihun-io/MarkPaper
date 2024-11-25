@@ -142,7 +142,7 @@ const App = () => {
 
   return (
     <div className="w-full max-w-full mx-auto p-4">
-      <div className="mb-4 flex items-center gap-4">
+      <div className="w-fit ml-auto mb-4 flex items-center gap-4">
         <select
           value={paperSize}
           onChange={(e) => setPaperSize(e.target.value)}
@@ -163,10 +163,10 @@ const App = () => {
 
       <div className="flex flex-row gap-4">
         {/* 편집기 */}
-        <div className="p-4 print:hidden flex-1 min-w-0">
+        <div className="print:hidden flex-1 min-w-0">
           {" "}
           {/* min-w-0 추가 */}
-          <h2 className="text-lg font-bold mb-2">마크다운 입력</h2>
+          <h2 className="text-lg font-bold mb-2">Markdown</h2>
           <Editor
             height="800px"
             defaultLanguage="markdown"
