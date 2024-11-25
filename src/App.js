@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react"; // useEffect 추가
+import React, { useState, useRef, useEffect } from "react";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkHtml from "remark-html";
@@ -6,8 +6,8 @@ import remarkGfm from "remark-gfm";
 import { Save, Import, FileOutput, Printer, FileDown } from "lucide-react";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
-import rehypeStringify from "rehype-stringify"; // 추가
-import remarkRehype from "remark-rehype"; // 추가
+import rehypeStringify from "rehype-stringify";
+import remarkRehype from "remark-rehype";
 import Editor from "@monaco-editor/react";
 import Preview from "./components/Preview";
 
@@ -98,11 +98,31 @@ const convertToHtml = async (markdown) => {
 };
 
 const App = () => {
+  const [isOpened, setIsOpened] = useState(false);
+  const [fileName, setFileName] = useState("새 문서.md");
+  const [filePath, setFilePath] = useState(""); // 파일 경로 상태 추가
   const [markdown, setMarkdown] = useState("");
   const [html, setHtml] = useState("");
   const [paperSize, setPaperSize] = useState("A4");
   const previewRef = useRef(null);
-  const editorRef = useRef(null); // Editor ref 추가
+  const editorRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpened) {
+      // isOpened가 true일 때만 실행될 코드
+    }
+  }, [isOpened]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (editorRef.current) {
+        editorRef.current.layout();
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleEditorChange = async (value) => {
     setMarkdown(value);
@@ -114,16 +134,36 @@ const App = () => {
     window.electronAPI.printToPDF();
   };
 
-  const handleSave = () => {
-    const result = markdown;
-    const blob = new Blob([result], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "markdown.md";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  const handleSave = async () => {
+    if (filePath) {
+      await window.electronAPI.saveFile(filePath, markdown);
+    } else {
+      handleOutput();
+    }
+  };
+
+  const handleOutput = async () => {
+    try {
+      // electronAPI를 통해 저장 경로 선택
+      const { filePath, canceled } = await window.electronAPI.showSaveDialog({
+        defaultPath: fileName,
+        filters: [{ name: "Markdown", extensions: ["md"] }],
+      });
+
+      if (!canceled && filePath) {
+        // 선택된 경로 저장
+        setFilePath(filePath);
+
+        // 파일 저장
+        await window.electronAPI.saveFile(filePath, markdown);
+
+        // 파일 이름 업데이트
+        const newFileName = filePath.split("/").pop();
+        setFileName(newFileName);
+      }
+    } catch (error) {
+      console.error("파일 저장 실패:", error);
+    }
   };
 
   const handleLoad = () => {
@@ -138,6 +178,9 @@ const App = () => {
         setMarkdown(text);
         const newHtml = await convertToHtml(text);
         setHtml(newHtml);
+        setIsOpened(true);
+        setFileName(file.name);
+        setFilePath(file.path); // 파일 경로 저장
       };
       reader.readAsText(file);
     };
@@ -148,17 +191,21 @@ const App = () => {
   const paperWidth = currentPaperSize.width;
   const paperHeight = currentPaperSize.height;
 
-  // resize 이벤트 핸들러 추가
-  useEffect(() => {
-    const handleResize = () => {
-      if (editorRef.current) {
-        editorRef.current.layout();
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  if (!isOpened) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <button onClick={() => setIsOpened(true)} className="p-4 rounded">
+          새 문서 작성하기
+        </button>
+        <button
+          onClick={handleLoad}
+          className="p-4 bg-blue-500 text-white rounded"
+        >
+          문서 로드하기
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-screen flex flex-col overflow-hidden">
@@ -181,7 +228,7 @@ const App = () => {
             </button>
           </div>
           <div>
-            <p>파일 명.md</p>
+            <p>{fileName}</p>
           </div>
           <div className="flex gap-4">
             <select
