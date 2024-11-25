@@ -149,6 +149,9 @@ app.on("ready", () => {
 
   // Dock 메뉴 설정
   createDockMenu();
+
+  // 첫 번째 창 생성
+  createWindow();
 });
 
 // 새 창 생성 IPC 핸들러
@@ -211,6 +214,7 @@ ipcMain.handle("dialog:showOpen", async (event, options) => {
 });
 
 app.on("window-all-closed", () => {
+  // Windows에서 모든 창이 닫히면 앱 종료
   if (process.platform !== "darwin") {
     app.quit();
   }
