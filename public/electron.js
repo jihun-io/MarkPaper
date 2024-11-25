@@ -14,6 +14,9 @@ function createWindow() {
       ? "http://localhost:3000"
       : `file://${__dirname}/index.html`;
   win.loadURL(startUrl);
+  if (process.env.NODE_ENV === "development") {
+    win.webContents.openDevTools();
+  }
 }
 
 app.whenReady().then(createWindow);
