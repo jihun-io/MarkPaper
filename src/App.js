@@ -163,8 +163,7 @@ const App = () => {
   return (
     <div className="w-full h-screen flex flex-col overflow-hidden">
       {/* 상단 컨트롤러바 */}
-      <div className="flex-none mb-4 px-4 pt-4">
-        {" "}
+      <header className="flex-none mb-4 px-4 pt-4">
         {/* padding 분리 */}
         <div className="w-full mb-4 flex flex-row items-center justify-between gap-4 flex-1">
           <div className="flex gap-4">
@@ -202,13 +201,12 @@ const App = () => {
             </button>
           </div>
         </div>
-      </div>
+      </header>
       {/* 메인 콘텐츠 영역 */}
-      <div className="flex-1 min-h-0 flex flex-row gap-4 px-4 pb-4">
-        {" "}
+      <main className="flex-1 min-h-0 flex flex-row gap-4 px-4 pb-4">
         {/* padding 분리, min-h-0 추가 */}
         {/* 편집기 */}
-        <div className="print:hidden flex-1 min-w-0 flex flex-col">
+        <section className="print:hidden flex-1 min-w-0 flex flex-col">
           <h2 className="flex-none text-lg font-bold mb-2">Markdown</h2>
           <div className="flex-1 min-h-0">
             <Editor
@@ -230,9 +228,9 @@ const App = () => {
               }}
             />
           </div>
-        </div>
+        </section>
         {/* 미리보기 */}
-        <div
+        <section
           className="print:p-0 print:shadow-none print:w-full flex-none flex flex-col min-w-0"
           style={{ width: `${paperWidth * 0.6}mm` }}
         >
@@ -247,8 +245,8 @@ const App = () => {
               html={html}
             />
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
       {/* 인쇄용 스타일 */}
       <style jsx global>{`
         .prose * {
