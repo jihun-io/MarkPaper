@@ -159,31 +159,49 @@ const App = () => {
   const paperHeight = currentPaperSize.height;
 
   return (
-    <div className="w-full max-w-full mx-auto p-4">
-      <div className="w-fit ml-auto mb-4 flex items-center gap-4">
-        <select
-          value={paperSize}
-          onChange={(e) => setPaperSize(e.target.value)}
-          className="p-2 border rounded"
-        >
-          {Object.keys(PAPER_SIZES).map((size) => (
-            <option key={size} value={size}>
-              {size}
-            </option>
-          ))}
-        </select>
-        <button onClick={handleSave} className="flex items-center gap-2">
-          <Save className="w-4 h-4" />
-          저장
-        </button>
-        <button onClick={handleLoad} className="flex items-center gap-2">
-          <Import className="w-4 h-4" />
-          불러오기
-        </button>
-        <button onClick={handlePrint} className="flex items-center gap-2">
-          <Printer className="w-4 h-4" />
-          인쇄
-        </button>
+    <div className="w-full h-screen flex flex-col overflow-hidden">
+      {" "}
+      {/* h-screen으로 변경 */}
+      {/* 상단 컨트롤러바 */}
+      <div className="flex-none mb-4 px-4 pt-4">
+        {" "}
+        {/* padding 분리 */}
+        <div className="w-full mb-4 flex flex-row items-center justify-between gap-4 flex-1">
+          <div className="flex gap-4">
+            <button onClick={handleSave} className="flex items-center gap-2">
+              <Save className="w-4 h-4" />
+              저장
+            </button>
+            <button onClick={handleOutput} className="flex items-center gap-2">
+              <FileOutput className="w-4 h-4" />
+              내보내기
+            </button>
+            <button onClick={handleLoad} className="flex items-center gap-2">
+              <Import className="w-4 h-4" />
+              불러오기
+            </button>
+          </div>
+          <div>
+            <p>파일 명.md</p>
+          </div>
+          <div className="flex gap-4">
+            <select
+              value={paperSize}
+              onChange={(e) => setPaperSize(e.target.value)}
+              className="p-2 border rounded"
+            >
+              {Object.keys(PAPER_SIZES).map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+            <button onClick={handlePrint} className="flex items-center gap-2">
+              <Printer className="w-4 h-4" />
+              인쇄
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-row gap-4">
