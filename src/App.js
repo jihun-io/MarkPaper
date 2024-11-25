@@ -101,6 +101,7 @@ const App = () => {
   const [html, setHtml] = useState("");
   const [paperSize, setPaperSize] = useState("A4");
   const previewRef = useRef(null);
+  const editorRef = useRef(null); // Editor ref 추가
 
   const handleEditorChange = async (value) => {
     setMarkdown(value);
@@ -145,6 +146,18 @@ const App = () => {
   const currentPaperSize = PAPER_SIZES[paperSize];
   const paperWidth = currentPaperSize.width;
   const paperHeight = currentPaperSize.height;
+
+  // resize 이벤트 핸들러 추가
+  useEffect(() => {
+    const handleResize = () => {
+      if (editorRef.current) {
+        editorRef.current.layout();
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div className="w-full h-screen flex flex-col overflow-hidden">
@@ -191,8 +204,10 @@ const App = () => {
           </div>
         </div>
       </div>
-
-      <div className="flex flex-row gap-4">
+      {/* 메인 콘텐츠 영역 */}
+      <div className="flex-1 min-h-0 flex flex-row gap-4 px-4 pb-4">
+        {" "}
+        {/* padding 분리, min-h-0 추가 */}
         {/* 편집기 */}
         <div className="print:hidden flex-1 min-w-0 flex flex-col">
           <h2 className="flex-none text-lg font-bold mb-2">Markdown</h2>
@@ -217,7 +232,6 @@ const App = () => {
             />
           </div>
         </div>
-
         {/* 미리보기 */}
         <div className="print:p-0 print:shadow-none print:w-full flex-1 flex flex-col min-w-0">
           <h2 className="flex-none text-lg font-bold mb-2 print:hidden">
