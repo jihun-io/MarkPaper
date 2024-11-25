@@ -101,6 +101,7 @@ const App = () => {
   const [isOpened, setIsOpened] = useState(false);
   const [fileName, setFileName] = useState("새 문서.md");
   const [filePath, setFilePath] = useState(""); // 파일 경로 상태 추가
+  const [isModified, setIsModified] = useState(false);
   const [markdown, setMarkdown] = useState("");
   const [html, setHtml] = useState("");
   const [paperSize, setPaperSize] = useState("A4");
@@ -112,6 +113,7 @@ const App = () => {
       console.log("저장 경로:", filePath);
       try {
         await window.electronAPI.saveFile(filePath, markdown);
+        setIsModified(false);
       } catch (error) {
         console.error("파일 저장 실패:", error);
       }
@@ -159,6 +161,7 @@ const App = () => {
     setMarkdown(value);
     const newHtml = await convertToHtml(value);
     setHtml(newHtml);
+    setIsModified(true);
   };
 
   const handlePrint = () => {
@@ -183,6 +186,7 @@ const App = () => {
         // 파일 이름 업데이트
         const newFileName = filePath.split("/").pop();
         setFileName(newFileName);
+        setIsModified(false);
       }
     } catch (error) {
       console.error("파일 저장 실패:", error);
@@ -204,6 +208,7 @@ const App = () => {
         setFileName(filePath.split("/").pop());
         setFilePath(filePath);
         setMarkdown(content);
+        setIsModified(false);
 
         const newHtml = await convertToHtml(content);
         setHtml(newHtml);
@@ -252,7 +257,7 @@ const App = () => {
             </button>
             <button onClick={handleOutput} className="flex items-center gap-2">
               <FileOutput className="w-4 h-4" />
-              내보내기
+              다른 이름으로 저장
             </button>
             <button onClick={handleLoad} className="flex items-center gap-2">
               <Import className="w-4 h-4" />
@@ -260,7 +265,14 @@ const App = () => {
             </button>
           </div>
           <div>
-            <p>{fileName}</p>
+            {isModified ? (
+              <p>
+                <span>•</span>
+                {fileName}
+              </p>
+            ) : (
+              <p>{fileName}</p>
+            )}
           </div>
           <div className="flex gap-4">
             <select
