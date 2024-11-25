@@ -40,3 +40,76 @@ body {
   color: var(--foreground);
   background: var(--background);
 }
+
+.prose * {
+  color: var(--foreground);
+}
+
+.prose .full-height {
+  min-height: 100%;
+}
+
+.prose p + h2 {
+  margin-top: 1.5rem;
+}
+
+.prose p + p {
+  margin-top: 1rem;
+}
+
+.prose svg {
+  display: inline-block;
+}
+
+.prose *:has(svg) {
+  display: inline-flex;
+  column-gap: 0.5rem;
+}
+
+@media screen {
+  .page-break {
+    height: 0;
+    page-break-after: always;
+    margin: 1rem 0;
+    border-top: 1px dashed #999;
+  }
+}
+
+@media print {
+  @page {
+    size: a4;
+    margin: 2cm;
+    font-size: 12pt;
+    counter-increment: page;
+  }
+
+  @page {
+    @bottom-center {
+      content: counter(page);
+      font-size: 8pt;
+    }
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .printable,
+  .printable * {
+    visibility: visible;
+  }
+
+  .printable {
+    position: absolute;
+    left: 0;
+    top: 0;
+    zoom: 1 !important;
+  }
+
+  .page-break {
+    height: 0;
+    page-break-after: always;
+    margin: 0;
+    border: none;
+  }
+}
