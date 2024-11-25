@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
-const fs = require("fs");
+const fs = require("fs").promises; // promises API 사용
 
 let mainWindow;
 
@@ -42,7 +42,23 @@ ipcMain.on("print-to-pdf", (event) => {
 });
 
 ipcMain.handle("save-file", async (event, filePath, content) => {
-  await fs.promises.writeFile(filePath, content);
+  try {
+    await fs.writeFile(filePath, content, { encoding: "utf8" });
+    return true;
+  } catch (error) {
+    console.error("파일 저장 에러:", error);
+    throw error;
+  }
+});
+
+ipcMain.handle("read-file", async (event, filePath) => {
+  try {
+    const content = await fs.readFile(filePath, { encoding: "utf8" });
+    return content;
+  } catch (error) {
+    console.error("파일 읽기 에러:", error);
+    throw error;
+  }
 });
 
 ipcMain.handle("dialog:showSave", async (event, options) => {
@@ -51,6 +67,13 @@ ipcMain.handle("dialog:showSave", async (event, options) => {
     filters: options.filters,
   });
   return result;
+});
+
+ipcMain.handle("dialog:showOpen", async (event, options) => {
+  return dialog.showOpenDialog({
+    properties: options.properties,
+    filters: options.filters,
+  });
 });
 
 app.on("window-all-closed", () => {

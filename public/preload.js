@@ -8,5 +8,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   saveFile: (filePath, content) =>
     ipcRenderer.invoke("save-file", filePath, content),
   loadFile: () => ipcRenderer.invoke("load-file"),
+  readFile: (filePath) => ipcRenderer.invoke("read-file", filePath),
   showSaveDialog: (options) => ipcRenderer.invoke("dialog:showSave", options),
+  showOpenDialog: (options) => ipcRenderer.invoke("dialog:showOpen", options),
 });

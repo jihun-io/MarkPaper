@@ -136,7 +136,12 @@ const App = () => {
 
   const handleSave = async () => {
     if (filePath) {
-      await window.electronAPI.saveFile(filePath, markdown);
+      console.log("저장 경로:", filePath);
+      try {
+        await window.electronAPI.saveFile(filePath, markdown);
+      } catch (error) {
+        console.error("파일 저장 실패:", error);
+      }
     } else {
       handleOutput();
     }
@@ -166,26 +171,35 @@ const App = () => {
     }
   };
 
-  const handleLoad = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".md";
-    input.onchange = async (event) => {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const text = e.target.result;
-        setMarkdown(text);
-        const newHtml = await convertToHtml(text);
-        setHtml(newHtml);
+  const handleLoad = async () => {
+    try {
+      const result = await window.electronAPI.showOpenDialog({
+        properties: ["openFile"],
+        filters: [{ name: "Markdown", extensions: ["md"] }],
+      });
+
+      if (!result.canceled && result.filePaths.length > 0) {
+        const filePath = result.filePaths[0];
+        const content = await window.electronAPI.readFile(filePath);
+
         setIsOpened(true);
-        setFileName(file.name);
-        setFilePath(file.path); // 파일 경로 저장
-      };
-      reader.readAsText(file);
-    };
-    input.click();
+        setFileName(filePath.split("/").pop());
+        setFilePath(filePath);
+        setMarkdown(content);
+
+        const newHtml = await convertToHtml(content);
+        setHtml(newHtml);
+      }
+    } catch (error) {
+      console.error("파일 로드 실패:", error);
+    }
   };
+
+  // 상태 변화 모니터링을 위한 useEffect 추가
+  useEffect(() => {
+    console.log("fileName updated:", fileName);
+    console.log("filePath updated:", filePath);
+  }, [fileName, filePath]);
 
   const currentPaperSize = PAPER_SIZES[paperSize];
   const paperWidth = currentPaperSize.width;
