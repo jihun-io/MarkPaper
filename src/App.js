@@ -162,8 +162,6 @@ const App = () => {
 
   return (
     <div className="w-full h-screen flex flex-col overflow-hidden">
-      {" "}
-      {/* h-screen으로 변경 */}
       {/* 상단 컨트롤러바 */}
       <div className="flex-none mb-4 px-4 pt-4">
         {" "}
@@ -234,7 +232,10 @@ const App = () => {
           </div>
         </div>
         {/* 미리보기 */}
-        <div className="print:p-0 print:shadow-none print:w-full flex-1 flex flex-col min-w-0">
+        <div
+          className="print:p-0 print:shadow-none print:w-full flex-none flex flex-col min-w-0"
+          style={{ width: `${paperWidth * 0.6}mm` }}
+        >
           <h2 className="flex-none text-lg font-bold mb-2 print:hidden">
             미리 보기
           </h2>
@@ -248,6 +249,81 @@ const App = () => {
           </div>
         </div>
       </div>
+      {/* 인쇄용 스타일 */}
+      <style jsx global>{`
+        .prose * {
+          color: var(--foreground);
+        }
+
+        .prose .full-height {
+          min-height: 100%;
+        }
+
+        .prose p + h2 {
+          margin-top: 1.5rem;
+        }
+
+        .prose p + p {
+          margin-top: 1rem;
+        }
+
+        .prose svg {
+          display: inline-block;
+        }
+
+        .prose *:has(svg) {
+          display: inline-flex;
+          column-gap: 0.5rem;
+        }
+
+        @media screen {
+          .page-break {
+            height: 0;
+            page-break-after: always;
+            margin: 1rem 0;
+            border-top: 1px dashed #999;
+          }
+        }
+
+        @media print {
+          @page {
+            size: ${paperSize.toLowerCase()};
+            margin: 2cm;
+            font-size: 12pt;
+            counter-increment: page;
+          }
+
+          @page {
+            @bottom-center {
+              content: counter(page);
+              font-size: 8pt;
+            }
+          }
+
+          body * {
+            visibility: hidden;
+          }
+
+          .printable,
+          .printable * {
+            visibility: visible;
+          }
+
+          .printable {
+            position: absolute;
+            left: 0;
+            top: 0;
+            zoom: 1 !important;
+          }
+
+          .page-break {
+            height: 0;
+            page-break-after: always;
+            margin: 0;
+            border: none;
+          }
+        }
+      `}</style>
     </div>
   );
 };
