@@ -188,24 +188,28 @@ const App = () => {
 
       <div className="flex flex-row gap-4">
         {/* 편집기 */}
-        <div className="print:hidden flex-1 min-w-0">
-          {" "}
-          {/* min-w-0 추가 */}
-          <h2 className="text-lg font-bold mb-2">Markdown</h2>
-          <Editor
-            height="800px"
-            defaultLanguage="markdown"
-            value={markdown}
-            onChange={handleEditorChange}
-            theme="light"
-            options={{
-              minimap: { enabled: false },
-              fontSize: 12,
-              lineNumbers: "on",
-              wordWrap: "on",
-              scrollBeyondLastLine: true,
-            }}
-          />
+        <div className="print:hidden flex-1 min-w-0 flex flex-col">
+          <h2 className="flex-none text-lg font-bold mb-2">Markdown</h2>
+          <div className="flex-1 min-h-0">
+            <Editor
+              height="100%"
+              defaultLanguage="markdown"
+              value={markdown}
+              onChange={handleEditorChange}
+              theme="light"
+              onMount={(editor) => {
+                editorRef.current = editor;
+              }}
+              options={{
+                minimap: { enabled: false },
+                fontSize: 12,
+                lineNumbers: "on",
+                wordWrap: "on",
+                scrollBeyondLastLine: true,
+                automaticLayout: true,
+              }}
+            />
+          </div>
         </div>
 
         {/* 미리보기 */}
