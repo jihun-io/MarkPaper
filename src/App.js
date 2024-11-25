@@ -13,6 +13,9 @@ import Editor from "@monaco-editor/react";
 // 용지 크기 정의 (mm 단위)
 const PAPER_SIZES = {
   A4: { width: 210, height: 297 },
+  A5: { width: 148, height: 210 },
+  Letter: { width: 215.9, height: 279.4 },
+  Legal: { width: 215.9, height: 355.6 },
 };
 
 // Tailwind 클래스들을 허용하도록 sanitize 스키마 확장
@@ -134,8 +137,8 @@ const App = () => {
   };
 
   const currentPaperSize = PAPER_SIZES[paperSize];
-  const paperWidth = mmToPx(currentPaperSize.width);
-  const paperHeight = mmToPx(currentPaperSize.height);
+  const paperWidth = currentPaperSize.width;
+  const paperHeight = currentPaperSize.height;
 
   return (
     <div className="w-full max-w-full mx-auto p-4">
@@ -181,14 +184,14 @@ const App = () => {
         </div>
 
         {/* 미리보기 */}
-        <div className="p-4 print:p-0 print:shadow-none print:w-full">
-          <h2 className="text-lg font-bold mb-2 print:hidden">미리보기</h2>
+        <div className="print:p-0 print:shadow-none print:w-full">
+          <h2 className="text-lg font-bold mb-2 print:hidden">미리 보기</h2>
           <div
             ref={previewRef}
             className="printable print:p-0 rounded-md overflow-auto print:border-0 print:overflow-visible"
             style={{
-              width: `21cm`,
-              height: `29.7cm`,
+              width: `${paperWidth}mm`,
+              height: `${paperHeight}mm`,
               backgroundColor: "white",
               zoom: 0.6,
             }}
@@ -256,7 +259,7 @@ const App = () => {
 
         @media print {
           @page {
-            size: a4;
+            size: ${paperSize.toLowerCase()};
             margin: 2cm;
             font-size: 12pt;
             counter-increment: page;
