@@ -209,36 +209,16 @@ const App = () => {
         </div>
 
         {/* 미리보기 */}
-        <div className="print:p-0 print:shadow-none print:w-full">
-          <h2 className="text-lg font-bold mb-2 print:hidden">미리 보기</h2>
-          <div
-            ref={previewRef}
-            className="printable print:p-0 rounded-md overflow-auto print:border-0 print:overflow-visible"
-            style={{
-              width: `${paperWidth}mm`,
-              height: `${paperHeight}mm`,
-              backgroundColor: "white",
-              zoom: 0.6,
-            }}
-          >
-            <div
-              className={`h-full print:m-0 text-[12pt] prose max-w-none
-                prose-headings:font-bold
-                prose-h1:text-2xl prose-h1:my-4 prose-h1:leading-[1.3]
-                prose-h2:text-xl prose-h2:mt-4 prose-h2:mb-0
-                prose-h3:text-lg prose-h3:mt-4 prose-h3:mb-4
-                prose-p:leading-[1.7] prose-p:my-2
-                prose-a:no-underline hover:prose-a:underline
-                prose-blockquote:border-l-4 
-                prose-blockquote:pl-4 prose-blockquote:py-1 
-                prose-ul:list-disc prose-ul:pl-4 prose-ul:mt-0 prose-ul:mb-2
-                prose-li:my-[0.2rem]
-                prose-strong:font-[700]
-                prose-table:w-fit prose-table:mt-4 prose-table:mb-0 prose-table:text-[12pt]
-                prose-thead:border-none
-                prose-th:py-0
-                prose-td:py-0`}
-              dangerouslySetInnerHTML={{ __html: html }}
+        <div className="print:p-0 print:shadow-none print:w-full flex-1 flex flex-col min-w-0">
+          <h2 className="flex-none text-lg font-bold mb-2 print:hidden">
+            미리 보기
+          </h2>
+          <div className="flex-1 min-h-0 overflow-auto">
+            <Preview
+              ref={previewRef}
+              paperWidth={paperWidth}
+              paperHeight={paperHeight}
+              html={html}
             />
           </div>
         </div>
