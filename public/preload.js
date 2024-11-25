@@ -4,6 +4,7 @@ const { ipcRenderer, contextBridge } = require("electron");
 console.log("preload.js가 정상적으로 로드되었습니다.");
 
 contextBridge.exposeInMainWorld("electronAPI", {
+  createNewWindow: () => ipcRenderer.invoke("window:create"),
   printToPDF: () => ipcRenderer.invoke("print-to-pdf"),
   saveFile: (filePath, content) =>
     ipcRenderer.invoke("save-file", filePath, content),
