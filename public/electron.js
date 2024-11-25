@@ -59,10 +59,9 @@ function createMenuTemplate() {
         {
           label: "인쇄",
           accelerator: "CmdOrCtrl+P",
-          click: async () => {
-            const { success, path } = await mainWindow.webContents.printToPDF(
-              {}
-            );
+          click: async (menuItem, browserWindow) => {
+            const { success, path } =
+              await browserWindow.webContents.printToPDF({});
             if (success) {
               console.log("PDF 파일 생성 성공:", path);
             }
@@ -157,11 +156,12 @@ ipcMain.handle("window:create", () => {
   createWindow();
 });
 
-ipcMain.handle("print-to-pdf", async () => {
+ipcMain.handle("print-to-pdf", async (event) => {
   const pdfPath = path.join(app.getPath("documents"), "print.pdf");
+  const browserWindow = BrowserWindow.fromWebContents(event.sender);
 
   try {
-    const data = await mainWindow.webContents.printToPDF({});
+    const data = await browserWindow.webContents.printToPDF({});
     await fs.writeFile(pdfPath, data);
 
     const pdfWindow = new BrowserWindow({ width: 800, height: 600 });
