@@ -1,6 +1,7 @@
 {
   "name": "markpaper-electron",
   "version": "0.1.0",
+  "productName": "MarkPaper",
   "private": true,
   "main": "public/electron.js",
   "homepage": "./",
