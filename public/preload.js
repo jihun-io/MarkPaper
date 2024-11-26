@@ -13,4 +13,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
   showSaveDialog: (options) => ipcRenderer.invoke("dialog:showSave", options),
   showOpenDialog: (options) => ipcRenderer.invoke("dialog:showOpen", options),
   showCloseConfirmation: () => ipcRenderer.invoke("show-close-confirmation"),
+  onMenuSave: (callback) => ipcRenderer.on("menu:save", callback),
+  onMenuSaveAs: (callback) => ipcRenderer.on("menu:saveAs", callback),
+  removeMenuSaveListener: () => ipcRenderer.removeAllListeners("menu:save"),
+  removeMenuSaveAsListener: () => ipcRenderer.removeAllListeners("menu:saveAs"),
+  onMenuPrint: (callback) => ipcRenderer.on("menu:print", callback),
+  removeMenuPrintListener: () => ipcRenderer.removeAllListeners("menu:print"),
 });
