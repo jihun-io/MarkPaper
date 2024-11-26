@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
-import remarkHtml from "remark-html";
 import remarkGfm from "remark-gfm";
 import { Save, Import, FileOutput, Printer, FileDown } from "lucide-react";
 import rehypeRaw from "rehype-raw";
@@ -281,6 +280,34 @@ const App = () => {
     console.log("fileName updated:", fileName);
     console.log("filePath updated:", filePath);
   }, [fileName, filePath]);
+
+  useEffect(() => {
+    // 메뉴 이벤트 리스너 등록
+    window.electronAPI.onMenuSave(() => {
+      handleSave();
+    });
+
+    window.electronAPI.onMenuSaveAs(() => {
+      handleOutput();
+    });
+
+    // 컴포넌트 언마운트 시 리스너 제거
+    return () => {
+      window.electronAPI.removeMenuSaveListener();
+      window.electronAPI.removeMenuSaveAsListener();
+    };
+  }, [handleSave, handleOutput]);
+
+  useEffect(() => {
+    // 메뉴 인쇄 이벤트 리스너 등록
+    window.electronAPI.onMenuPrint(() => {
+      handlePrint();
+    });
+
+    return () => {
+      window.electronAPI.removeMenuPrintListener();
+    };
+  }, [handlePrint]);
 
   const currentPaperSize = PAPER_SIZES[paperSize];
   const paperWidth = currentPaperSize.width;
