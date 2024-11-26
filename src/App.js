@@ -344,10 +344,6 @@ const App = () => {
               <FileOutput className="w-4 h-4" />
               다른 이름으로 저장
             </button>
-            <button onClick={handleLoad} className="flex items-center gap-2">
-              <Import className="w-4 h-4" />
-              불러오기
-            </button>
           </div>
           <div>
             {isModified ? (
