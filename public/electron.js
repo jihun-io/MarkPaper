@@ -57,6 +57,25 @@ function createMenuTemplate() {
         },
         { type: "separator" },
         {
+          label: "저장",
+          accelerator: "CmdOrCtrl+S",
+          click: async (menuItem, browserWindow) => {
+            if (browserWindow) {
+              browserWindow.webContents.send("menu:save");
+            }
+          },
+        },
+        {
+          label: "다른 이름으로 저장",
+          accelerator: "CmdOrCtrl+Shift+S",
+          click: async (menuItem, browserWindow) => {
+            if (browserWindow) {
+              browserWindow.webContents.send("menu:saveAs");
+            }
+          },
+        },
+        { type: "separator" },
+        {
           label: "인쇄",
           accelerator: "CmdOrCtrl+P",
           click: async (menuItem, browserWindow) => {
