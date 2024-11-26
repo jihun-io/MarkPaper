@@ -4,9 +4,8 @@ import { Preview } from "./components/Preview";
 import { useDocumentStore } from "./store/documentStore";
 import { useStyleStore } from "./store/styleStore";
 import { useFileStore } from "./store/fileStore";
-import { convertToHtml } from "./utils/markdown";
 import { updateFontFamily, updateFontSize } from "./utils/styles";
-import { PAPER_SIZES, FONTS } from "./constants";
+import { PAPER_SIZES } from "./constants";
 import { Toolbar } from "./components/Toolbar";
 
 const App = () => {
