@@ -4,7 +4,6 @@ export default function PreviewStyles({
   paperHeight,
   html,
 }) {
-  console.log(html);
   return (
     <div
       ref={previewRef}
