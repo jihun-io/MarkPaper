@@ -18,7 +18,7 @@ export const updateFontFamily = (content, fontFamily) => {
 export const updateFontSize = (content, fontSize) => {
   const styleRegex = /<style>\s*([\s\S]*?)\s*<\/style>/;
   const proseFontRegex = /\.prose\s*{[^}]*font-size:[^}]*}/;
-  const newFontRule = `.prose {\n  font-size: ${fontSize}px;\n}`;
+  const newFontRule = `.prose {\n  font-size: ${fontSize}pt;\n}`;
 
   // style 태그가 있는 경우
   if (styleRegex.test(content)) {
