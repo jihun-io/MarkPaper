@@ -8,6 +8,22 @@ import { updateFontFamily, updateFontSize } from "./utils/styles";
 import { PAPER_SIZES } from "./constants";
 import { Toolbar } from "./components/Toolbar";
 
+const parseStyleTag = (content, setFont, setFontSize) => {
+  const styleTagMatch = content.match(/<style>([\s\S]*?)<\/style>/);
+  if (styleTagMatch) {
+    const styleContent = styleTagMatch[1];
+    const fontFamilyMatch = styleContent.match(/font-family:\s*([^;]+);/);
+    const fontSizeMatch = styleContent.match(/font-size:\s*([^;]+);/);
+
+    if (fontFamilyMatch) {
+      setFont(fontFamilyMatch[1].trim());
+    }
+    if (fontSizeMatch) {
+      setFontSize(parseInt(fontSizeMatch[1].trim()));
+    }
+  }
+};
+
 const App = () => {
   const { markdown, html, setMarkdown, setHtml, updateDocument } =
     useDocumentStore();
@@ -137,19 +153,7 @@ const App = () => {
       setIsModified(false);
 
       // 스타일 태그 파싱
-      const styleTagMatch = content.match(/<style>([\s\S]*?)<\/style>/);
-      if (styleTagMatch) {
-        const styleContent = styleTagMatch[1];
-        const fontFamilyMatch = styleContent.match(/font-family:\s*([^;]+);/);
-        const fontSizeMatch = styleContent.match(/font-size:\s*([^;]+);/);
-
-        if (fontFamilyMatch) {
-          setFont(fontFamilyMatch[1].trim());
-        }
-        if (fontSizeMatch) {
-          setFontSize(parseInt(fontSizeMatch[1].trim()));
-        }
-      }
+      parseStyleTag(content, setFont, setFontSize);
     } catch (error) {
       console.error("파일 로드 실패:", error);
     }
