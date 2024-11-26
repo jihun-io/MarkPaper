@@ -99,7 +99,7 @@ const convertToHtml = async (markdown) => {
 
 const App = () => {
   const [isOpened, setIsOpened] = useState(false);
-  const [fileName, setFileName] = useState("새 문서.md");
+  const [fileName, setFileName] = useState("새 문서");
   const [filePath, setFilePath] = useState(""); // 파일 경로 상태 추가
   const [isModified, setIsModified] = useState(false);
   const [markdown, setMarkdown] = useState("");
