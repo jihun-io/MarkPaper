@@ -1,6 +1,8 @@
 // src/components/Toolbar.jsx
 import React from "react";
-import { Save, FileOutput, Printer } from "lucide-react";
+import Save from "lucide-react/dist/esm/icons/save";
+import FileOutput from "lucide-react/dist/esm/icons/file-output";
+import Printer from "lucide-react/dist/esm/icons/printer";
 import { useStyleStore } from "../store/styleStore";
 import { PAPER_SIZES, FONTS } from "../constants";
 
