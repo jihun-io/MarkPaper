@@ -73,6 +73,7 @@ const schema = {
     "svg",
     "path",
     "style",
+    "a",
   ],
 };
 
