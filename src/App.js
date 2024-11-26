@@ -304,7 +304,7 @@ const App = () => {
           onClick={handleLoad}
           className="p-4 bg-arapawa-500 text-white rounded transition-colors hover:bg-arapawa-800 active:bg-arapawa-900"
         >
-          문서 로드하기
+          문서 불러오기
         </button>
       </div>
     );
