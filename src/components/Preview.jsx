@@ -26,7 +26,9 @@ export default function Preview({ previewRef, paperWidth, paperHeight, html }) {
                 prose-table:w-fit prose-table:mt-4 prose-table:mb-0 prose-table:text-[12pt]
                 prose-thead:border-none
                 prose-th:py-0
-                prose-td:py-0`}
+                prose-td:py-0
+                after:content-[''] after:block after:opacity-0 after:w-full after:h-[100vh]
+                `}
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </div>
