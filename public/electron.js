@@ -106,15 +106,15 @@ function createMenuTemplate() {
     template.unshift({
       label: app.name,
       submenu: [
-        { role: "about" },
+        { label: "MarkPaper에 관하여", role: "about" },
         { type: "separator" },
-        { role: "services" },
+        { label: "서비스", role: "services" },
         { type: "separator" },
-        { role: "hide" },
-        { role: "hideothers" },
-        { role: "unhide" },
+        { label: "숨기기", role: "hide" },
+        { label: "기타 숨기기", role: "hideothers" },
+        { label: "모두 표시", role: "unhide" },
         { type: "separator" },
-        { role: "quit" },
+        { label: "MarkPaper 종료", role: "quit" },
       ],
     });
   }
