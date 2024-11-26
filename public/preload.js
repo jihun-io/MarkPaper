@@ -13,6 +13,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   showSaveDialog: (options) => ipcRenderer.invoke("dialog:showSave", options),
   showOpenDialog: (options) => ipcRenderer.invoke("dialog:showOpen", options),
   showCloseConfirmation: () => ipcRenderer.invoke("show-close-confirmation"),
+  onMenuOpen: (callback) =>
+    ipcRenderer.on("menu:open", (event, filePath) => callback(filePath)),
+  removeMenuOpenListener: () => ipcRenderer.removeAllListeners("menu:open"),
   onMenuSave: (callback) => ipcRenderer.on("menu:save", callback),
   onMenuSaveAs: (callback) => ipcRenderer.on("menu:saveAs", callback),
   removeMenuSaveListener: () => ipcRenderer.removeAllListeners("menu:save"),

@@ -55,6 +55,22 @@ function createMenuTemplate() {
           accelerator: "CmdOrCtrl+N",
           click: () => createWindow(),
         },
+        {
+          label: "열기",
+          accelerator: "CmdOrCtrl+O",
+          click: async (menuItem, browserWindow) => {
+            const result = await dialog.showOpenDialog(browserWindow, {
+              properties: ["openFile"],
+              filters: [{ name: "Markdown 파일", extensions: ["md"] }],
+            });
+            if (!result.canceled && result.filePaths.length > 0) {
+              const newWindow = createWindow();
+              newWindow.webContents.once("did-finish-load", () => {
+                newWindow.webContents.send("menu:open", result.filePaths[0]);
+              });
+            }
+          },
+        },
         { type: "separator" },
         {
           label: "저장",

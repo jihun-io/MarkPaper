@@ -103,43 +103,47 @@ const App = () => {
   }, [filePath, markdown, handleOutput]);
 
   // 파일 로드 핸들러
-  const handleLoad = useCallback(async () => {
+  const handleLoadFile = async (filePath) => {
     try {
-      const result = await window.electronAPI.showOpenDialog({
-        properties: ["openFile"],
-        filters: [{ name: "Markdown", extensions: ["md"] }],
-      });
+      const content = await window.electronAPI.readFile(filePath);
+      setFilePath(filePath);
+      setFileName(filePath.split("/").pop());
+      updateDocument(content);
+      setIsOpened(true);
+      setIsModified(false);
 
-      if (!result.canceled && result.filePaths.length > 0) {
-        const content = await window.electronAPI.readFile(result.filePaths[0]);
-        setFilePath(result.filePaths[0]);
-        setFileName(result.filePaths[0].split("/").pop());
-        updateDocument(content);
-        setIsOpened(true);
-        setIsModified(false);
+      // 스타일 태그 파싱
+      const styleTagMatch = content.match(/<style>([\s\S]*?)<\/style>/);
+      if (styleTagMatch) {
+        const styleContent = styleTagMatch[1];
+        const fontFamilyMatch = styleContent.match(/font-family:\s*([^;]+);/);
+        const fontSizeMatch = styleContent.match(/font-size:\s*([^;]+);/);
 
-        // 스타일 태그 파싱
-        const styleTagMatch = content.match(/<style>([\s\S]*?)<\/style>/);
-        if (styleTagMatch) {
-          const styleContent = styleTagMatch[1];
-          const fontFamilyMatch = styleContent.match(/font-family:\s*([^;]+);/);
-          const fontSizeMatch = styleContent.match(/font-size:\s*([^;]+);/);
-
-          if (fontFamilyMatch) {
-            setFont(fontFamilyMatch[1].trim());
-          }
-          if (fontSizeMatch) {
-            setFontSize(parseInt(fontSizeMatch[1].trim()));
-          }
+        if (fontFamilyMatch) {
+          setFont(fontFamilyMatch[1].trim());
+        }
+        if (fontSizeMatch) {
+          setFontSize(parseInt(fontSizeMatch[1].trim()));
         }
       }
     } catch (error) {
       console.error("파일 로드 실패:", error);
     }
-  }, []);
+  };
 
   const handlePrint = useCallback(() => {
     window.electronAPI.printToPDF();
+  }, []);
+
+  // 메뉴 바에서 파일 열기 이벤트 처리
+  useEffect(() => {
+    window.electronAPI.onMenuOpen((filePath) => {
+      handleLoadFile(filePath);
+    });
+
+    return () => {
+      window.electronAPI.removeMenuOpenListener();
+    };
   }, []);
 
   // 단축 키 관련 코드
@@ -301,7 +305,7 @@ const App = () => {
           새 문서 작성하기
         </button>
         <button
-          onClick={handleLoad}
+          onClick={handleLoadFile}
           className="p-4 bg-arapawa-500 text-white rounded transition-colors hover:bg-arapawa-800 active:bg-arapawa-900"
         >
           문서 불러오기
