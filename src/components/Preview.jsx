@@ -27,7 +27,7 @@ export default function Preview({ previewRef, paperWidth, paperHeight, html }) {
                 prose-thead:border-none
                 prose-th:py-0
                 prose-td:py-0
-                after:content-[''] after:block after:opacity-0 after:w-full after:h-[100vh]
+                after:content-[''] after:block after:opacity-0 after:w-full after:h-[100vh] after:print:hidden
                 `}
         dangerouslySetInnerHTML={{ __html: html }}
       />
