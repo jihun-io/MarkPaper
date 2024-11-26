@@ -99,6 +99,13 @@
       "output": "dist"
     },
     "mac": {
+      "fileAssociations": [
+        {
+          "ext": "md",
+          "name": "Markdown File",
+          "role": "Editor"
+        }
+      ],
       "icon": "assets/icons/mac/icon_512x512@2x.icns",
       "category": "public.app-category.utilities",
       "target": [
@@ -113,6 +120,13 @@
     },
     "afterSign": "./scripts/notarize.js",
     "win": {
+      "fileAssociations": [
+        {
+          "ext": "md",
+          "name": "Markdown File",
+          "role": "Editor"
+        }
+      ],
       "icon": "assets/icons/windows/icon.ico",
       "extraResources": [
         {

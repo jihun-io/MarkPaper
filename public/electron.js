@@ -5,6 +5,29 @@ const fs = require("fs").promises;
 // 창 관리를 위한 배열
 const windows = new Set();
 
+// 파일 연결 설정
+function setupFileAssociations() {
+  // .md 파일 확장자 연결
+  if (process.platform === "win32") {
+    app.setAsDefaultProtocolClient("markdown");
+  }
+}
+
+// 파일을 여는 함수
+async function openFileInWindow(filePath, existingWindow = null) {
+  let targetWindow = existingWindow;
+
+  if (!targetWindow) {
+    targetWindow = createWindow();
+    await new Promise((resolve) =>
+      targetWindow.webContents.once("did-finish-load", resolve)
+    );
+  }
+
+  targetWindow.webContents.send("menu:open", filePath);
+  return targetWindow;
+}
+
 // 새 창 생성 함수
 function createWindow() {
   const newWindow = new BrowserWindow({
@@ -177,6 +200,9 @@ function createDockMenu() {
 app.on("ready", () => {
   process.env.LANG = "ko_KR.UTF-8";
 
+  // 파일 연결 설정
+  setupFileAssociations();
+
   // 메뉴바 설정
   const menu = Menu.buildFromTemplate(createMenuTemplate());
   Menu.setApplicationMenu(menu);
@@ -184,9 +210,40 @@ app.on("ready", () => {
   // Dock 메뉴 설정
   createDockMenu();
 
-  // 첫 번째 창 생성
-  createWindow();
+  // 시작 시 전달된 파일 경로가 있는지 확인
+  const fileToOpen = process.argv.find((arg) => arg.endsWith(".md"));
+  if (fileToOpen) {
+    createWindow();
+    openFileInWindow(fileToOpen);
+  } else {
+    createWindow();
+  }
 });
+
+// 파일 연결 이벤트 처리
+app.on("will-finish-launching", () => {
+  // macOS에서 파일 더블클릭으로 열기
+  app.on("open-file", (event, filePath) => {
+    event.preventDefault();
+    const existingWindow = BrowserWindow.getAllWindows()[0];
+    openFileInWindow(filePath, existingWindow);
+  });
+
+  // Windows에서 파일 더블클릭으로 열기
+  app.on("second-instance", (event, commandLine) => {
+    const fileToOpen = commandLine.find((arg) => arg.endsWith(".md"));
+    if (fileToOpen) {
+      const existingWindow = BrowserWindow.getAllWindows()[0];
+      openFileInWindow(fileToOpen, existingWindow);
+    }
+  });
+});
+
+// 중복 실행 방지
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+}
 
 // 새 창 생성 IPC 핸들러
 ipcMain.handle("window:create", () => {
