@@ -60,10 +60,9 @@ function createMenuTemplate() {
           label: "인쇄",
           accelerator: "CmdOrCtrl+P",
           click: async (menuItem, browserWindow) => {
-            const { success, path } =
-              await browserWindow.webContents.printToPDF({});
-            if (success) {
-              console.log("PDF 파일 생성 성공:", path);
+            if (browserWindow) {
+              // renderer 프로세스에 인쇄 이벤트 전송
+              browserWindow.webContents.send("menu:print");
             }
           },
         },
