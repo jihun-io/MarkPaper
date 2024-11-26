@@ -325,19 +325,28 @@ const App = () => {
 
   if (!isOpened) {
     return (
-      <div className="flex items-center justify-center h-screen gap-x-4">
-        <button
-          onClick={() => setIsOpened(true)}
-          className="p-4 rounded hover:bg-arapawa-50 transition-colors active:bg-arapawa-100"
-        >
-          새 문서 작성하기
-        </button>
-        <button
-          onClick={handleLoad}
-          className="p-4 bg-arapawa-500 text-white rounded transition-colors hover:bg-arapawa-800 active:bg-arapawa-900"
-        >
-          문서 불러오기
-        </button>
+      <div className="flex flex-col justify-around h-screen">
+        <h1 className="flex justify-center">
+          <img width="240" src="/images/MarkPaper.svg" alt="MarkPaper" />
+        </h1>
+        <ul className="flex items-center justify-center gap-x-8">
+          <li>
+            <button
+              onClick={() => setIsOpened(true)}
+              className="px-4 py-2 rounded hover:bg-arapawa-50 transition-colors active:bg-arapawa-100"
+            >
+              새 문서 작성
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={handleLoad}
+              className="px-4 py-2 bg-arapawa-500 text-white rounded transition-colors hover:bg-arapawa-800 active:bg-arapawa-900"
+            >
+              문서 열기...
+            </button>
+          </li>
+        </ul>
       </div>
     );
   }
