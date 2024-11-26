@@ -1,178 +1,68 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { unified } from "unified";
-import remarkParse from "remark-parse";
-import remarkGfm from "remark-gfm";
-import { Save, Import, FileOutput, Printer, FileDown } from "lucide-react";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
-import rehypeStringify from "rehype-stringify";
-import remarkRehype from "remark-rehype";
-import Editor from "@monaco-editor/react";
-import Preview from "./components/Preview";
-
-// 용지 크기 정의 (mm 단위)
-const PAPER_SIZES = {
-  A4: { width: 210, height: 297 },
-  A5: { width: 148, height: 210 },
-  Letter: { width: 215.9, height: 279.4 },
-  Legal: { width: 215.9, height: 355.6 },
-};
-
-const FONTS = {
-  Pretendard: "Pretendard",
-  SourceHanSerif: "본명조",
-  KoddiUDOnGothic: "Koddi UD 온고딕",
-};
-
-// Tailwind 클래스들을 허용하도록 sanitize 스키마 확장
-const schema = {
-  ...defaultSchema,
-  attributes: {
-    ...defaultSchema.attributes,
-    "*": [
-      ...(defaultSchema.attributes["*"] || []),
-      "className",
-      "class",
-      "style",
-      "width",
-      "height",
-      "display",
-      "align",
-      "valign",
-      "for",
-      // SVG 관련 속성 추가
-      "viewBox",
-      "fill",
-      "stroke",
-      "stroke-width",
-      "stroke-linecap",
-      "stroke-linejoin",
-      "xmlns",
-    ],
-    // SVG 태그 명시적 허용
-    svg: [
-      "xmlns",
-      "fill",
-      "viewBox",
-      "class",
-      "stroke",
-      "stroke-width",
-      "class",
-      "className",
-    ],
-    path: [
-      "d",
-      "fill",
-      "stroke",
-      "stroke-width",
-      "stroke-linecap",
-      "stroke-linejoin",
-    ],
-  },
-  // 허용할 태그에 SVG 관련 태그 추가
-  tagNames: [
-    ...(defaultSchema.tagNames || []),
-    "span",
-    "div",
-    "p",
-    "br",
-    "svg",
-    "path",
-    "style",
-    "a",
-  ],
-};
-
-const convertToHtml = async (markdown) => {
-  const markdownWithBreaks = markdown.replace(
-    /---pagebreak---/g,
-    '<div class="page-break"></div>'
-  );
-
-  const result = await unified()
-    .use(remarkParse)
-    .use(remarkGfm) // GFM 지원 추가
-    .use(remarkRehype, {
-      // rehype 옵션 추가
-      allowDangerousHtml: true, // raw HTML 허용
-    })
-    .use(rehypeRaw) // raw HTML 처리
-    .use(rehypeSanitize, schema)
-    .use(rehypeStringify)
-    .process(markdownWithBreaks);
-
-  return result.toString();
-};
-
-// font-family CSS 규칙 생성/교체 함수
-const updateFontFamily = (content, fontFamily) => {
-  const styleRegex = /<style>\s*([\s\S]*?)\s*<\/style>/;
-  const proseFontRegex = /\.prose\s*{[^}]*font-family:[^}]*}/;
-  const newFontRule = `.prose {\n  font-family: ${fontFamily};\n}`;
-
-  // style 태그가 있는 경우
-  if (styleRegex.test(content)) {
-    // .prose의 font-family 규칙이 있는 경우
-    if (proseFontRegex.test(content)) {
-      return content.replace(proseFontRegex, newFontRule);
-    }
-    // style 태그는 있지만 font-family 규칙이 없는 경우
-    return content.replace(styleRegex, (match, p1) => {
-      return `<style>\n${p1}${p1 ? "\n" : ""}${newFontRule}\n</style>`;
-    });
-  }
-
-  // style 태그가 없는 경우 - 문서 최상단에 삽입
-  return `<style>\n${newFontRule}\n</style>\n\n${content}`;
-};
-
-const updateFontSize = (content, fontSize) => {
-  const styleRegex = /<style>\s*([\s\S]*?)\s*<\/style>/;
-  const proseFontRegex = /\.prose\s*{[^}]*font-size:[^}]*}/;
-  const newFontRule = `.prose {\n  font-size: ${fontSize}px;\n}`;
-
-  // style 태그가 있는 경우
-  if (styleRegex.test(content)) {
-    // .prose의 font-size 규칙이 있는 경우
-    if (proseFontRegex.test(content)) {
-      return content.replace(proseFontRegex, newFontRule);
-    }
-    // style 태그는 있지만 font-size 규칙이 없는 경우
-    return content.replace(styleRegex, (match, p1) => {
-      return `<style>\n${p1}${p1 ? "\n" : ""}${newFontRule}\n</style>`;
-    });
-  }
-
-  // style 태그가 없는 경우 - 문서 최상단에 삽입
-  return `<style>\n${newFontRule}\n</style>\n\n${content}`;
-};
+import React, { useRef, useEffect, useCallback } from "react";
+import { Editor } from "./components/Editor";
+import { Preview } from "./components/Preview";
+import { useDocumentStore } from "./store/documentStore";
+import { useStyleStore } from "./store/styleStore";
+import { useFileStore } from "./store/fileStore";
+import { convertToHtml } from "./utils/markdown";
+import { updateFontFamily, updateFontSize } from "./utils/styles";
+import { PAPER_SIZES, FONTS } from "./constants";
+import { Toolbar } from "./components/Toolbar";
 
 const App = () => {
-  const [isOpened, setIsOpened] = useState(false);
-  const [fileName, setFileName] = useState("새 문서");
-  const [filePath, setFilePath] = useState(""); // 파일 경로 상태 추가
-  const [isModified, setIsModified] = useState(false);
-  const [markdown, setMarkdown] = useState("");
-  const [html, setHtml] = useState("");
-  const [paperSize, setPaperSize] = useState("A4");
-  const [currentFont, setCurrentFont] = useState("Pretendard");
-  const [currentFontSize, setCurrentFontSize] = useState(12);
+  const { markdown, html, setMarkdown, setHtml, updateDocument } =
+    useDocumentStore();
+
+  const { paperSize, currentFont, currentFontSize, setFont, setFontSize } =
+    useStyleStore();
+
+  const {
+    isOpened,
+    fileName,
+    filePath,
+    isModified,
+    setIsOpened,
+    setFileName,
+    setFilePath,
+    setIsModified,
+  } = useFileStore();
+
   const previewRef = useRef(null);
   const editorRef = useRef(null);
 
+  // 파일 저장 핸들러
   const handleSave = useCallback(async () => {
-    if (filePath) {
-      console.log("저장 경로:", filePath);
-      try {
-        await window.electronAPI.saveFile(filePath, markdown);
-        setIsModified(false);
-      } catch (error) {
-        console.error("파일 저장 실패:", error);
-      }
-    } else {
-      handleOutput();
+    if (!filePath) {
+      return handleOutput();
+    }
+    try {
+      await window.electronAPI.saveFile(filePath, markdown);
+      setIsModified(false);
+    } catch (error) {
+      console.error("파일 저장 실패:", error);
     }
   }, [filePath, markdown]);
+
+  // 파일 로드 핸들러
+  const handleLoad = useCallback(async () => {
+    try {
+      const result = await window.electronAPI.showOpenDialog({
+        properties: ["openFile"],
+        filters: [{ name: "Markdown", extensions: ["md"] }],
+      });
+
+      if (!result.canceled && result.filePaths.length > 0) {
+        const content = await window.electronAPI.readFile(result.filePaths[0]);
+        setFilePath(result.filePaths[0]);
+        setFileName(result.filePaths[0].split("/").pop());
+        updateDocument(content);
+        setIsOpened(true);
+        setIsModified(false);
+      }
+    } catch (error) {
+      console.error("파일 로드 실패:", error);
+    }
+  }, []);
 
   const handlePrint = useCallback(() => {
     window.electronAPI.printToPDF();
@@ -228,10 +118,10 @@ const App = () => {
   }, []);
 
   const handleEditorChange = async (value) => {
-    setMarkdown(value);
-    const newHtml = await convertToHtml(value);
-    setHtml(newHtml);
-    setIsModified(true);
+    const success = await updateDocument(value);
+    if (success) {
+      setIsModified(true);
+    }
   };
 
   const handleOutput = async () => {
@@ -256,31 +146,6 @@ const App = () => {
       }
     } catch (error) {
       console.error("파일 저장 실패:", error);
-    }
-  };
-
-  const handleLoad = async () => {
-    try {
-      const result = await window.electronAPI.showOpenDialog({
-        properties: ["openFile"],
-        filters: [{ name: "Markdown", extensions: ["md"] }],
-      });
-
-      if (!result.canceled && result.filePaths.length > 0) {
-        const filePath = result.filePaths[0];
-        const content = await window.electronAPI.readFile(filePath);
-
-        setIsOpened(true);
-        setFileName(filePath.split("/").pop());
-        setFilePath(filePath);
-        setMarkdown(content);
-        setIsModified(false);
-
-        const newHtml = await convertToHtml(content);
-        setHtml(newHtml);
-      }
-    } catch (error) {
-      console.error("파일 로드 실패:", error);
     }
   };
 
@@ -361,59 +226,26 @@ const App = () => {
     };
   }, [handlePrint]);
 
-  // 서체 변경 핸들러
   const handleFontChange = (e) => {
     const fontKey = e.target.value;
-    setCurrentFont(FONTS[fontKey]);
+    setFont(fontKey);
 
     if (editorRef.current) {
       const model = editorRef.current.getModel();
       const content = model.getValue();
-
       const updatedContent = updateFontFamily(content, fontKey);
-
-      // 에디터 전체 내용 교체
-      model.pushEditOperations(
-        [],
-        [
-          {
-            range: model.getFullModelRange(),
-            text: updatedContent,
-          },
-        ],
-        () => null
-      );
-
-      // HTML 미리보기 업데이트
-      handleEditorChange(updatedContent);
+      model.setValue(updatedContent);
     }
   };
 
-  // 서체 크기 변경 핸들러
-  const handleFontSizeChange = (e) => {
-    const fontSize = e.target.value;
-    setCurrentFontSize(fontSize);
+  const handleFontSizeChange = (newSize) => {
+    setFontSize(newSize);
 
     if (editorRef.current) {
       const model = editorRef.current.getModel();
       const content = model.getValue();
-
-      const updatedContent = updateFontSize(content, fontSize);
-
-      // 에디터 전체 내용 교체
-      model.pushEditOperations(
-        [],
-        [
-          {
-            range: model.getFullModelRange(),
-            text: updatedContent,
-          },
-        ],
-        () => null
-      );
-
-      // HTML 미리보기 업데이트
-      handleEditorChange(updatedContent);
+      const updatedContent = updateFontSize(content, newSize);
+      model.setValue(updatedContent);
     }
   };
 
@@ -439,120 +271,36 @@ const App = () => {
       </div>
     );
   }
-
-  const buttonClass =
-    "p-2 flex items-center gap-2 rounded hover:bg-arapawa-50 active:bg-arapawa-100 transition-colors";
-
   return (
     <div className="text-sm w-full h-screen flex flex-col overflow-hidden">
-      {/* 상단 컨트롤러바 */}
-      <header className="flex-none flex items-center px-4 py-2">
-        {/* padding 분리 */}
-        <div className="w-full flex flex-row items-center justify-between gap-4 flex-1">
-          <div className="flex gap-2">
-            <button onClick={handleSave} className={buttonClass}>
-              <Save className="w-4 h-4" />
-              저장
-            </button>
-            <button onClick={handleOutput} className={buttonClass}>
-              <FileOutput className="w-4 h-4" />
-              다른 이름으로 저장
-            </button>
-          </div>
-          <div>
-            {isModified ? (
-              <p>
-                <span>•</span>
-                {fileName}
-              </p>
-            ) : (
-              <p>{fileName}</p>
-            )}
-          </div>
-          <div className="flex gap-4">
-            <select
-              value={Object.keys(FONTS).find(
-                (key) => FONTS[key] === currentFont
-              )}
-              onChange={handleFontChange}
-              className="px-2 border rounded"
-            >
-              {Object.keys(FONTS).map((font) => (
-                <option key={font} value={font}>
-                  {FONTS[font]}
-                </option>
-              ))}
-            </select>
-            <input
-              className="p-2 border rounded w-[4rem]"
-              type="number"
-              name="fontSize"
-              id="fontSize"
-              value={currentFontSize}
-              onChange={(e) => handleFontSizeChange(e)}
-            />
-            <select
-              value={paperSize}
-              onChange={(e) => setPaperSize(e.target.value)}
-              className="p-2 border rounded"
-            >
-              {Object.keys(PAPER_SIZES).map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
-            <button onClick={handlePrint} className={buttonClass}>
-              <Printer className="w-4 h-4" />
-              인쇄
-            </button>
-          </div>
-        </div>
-      </header>
-      {/* 메인 콘텐츠 영역 */}
+      <Toolbar
+        onSave={handleSave}
+        onSaveAs={handleOutput}
+        fileName={fileName}
+        isModified={isModified}
+        onPrint={handlePrint}
+        onFontChange={handleFontChange}
+        onFontSizeChange={handleFontSizeChange}
+        currentFont={currentFont}
+        currentFontSize={currentFontSize}
+      />
       <main className="flex-1 min-h-0 flex flex-row gap-4 px-4 pb-4 bg-gray-100">
-        {/* padding 분리, min-h-0 추가 */}
-        {/* 편집기 */}
-        <section className="print:hidden flex-1 min-w-0 flex flex-col">
-          <h2 className="text-sm flex-none font-bold my-2">Markdown</h2>
-          <div className="flex-1 min-h-0">
-            <Editor
-              height="100%"
-              defaultLanguage="markdown"
-              value={markdown}
-              onChange={handleEditorChange}
-              theme="light"
-              onMount={(editor) => {
-                editorRef.current = editor;
-              }}
-              options={{
-                minimap: { enabled: false },
-                fontSize: 12,
-                lineNumbers: "on",
-                wordWrap: "on",
-                scrollBeyondLastLine: true,
-                automaticLayout: true,
-              }}
-            />
-          </div>
-        </section>
-        {/* 미리보기 */}
-        <section
-          className="print:p-0 print:shadow-none print:w-full flex-none flex flex-col min-w-0"
-          style={{ width: `${paperWidth * 0.6}mm` }}
-        >
-          <h2 className="text-sm flex-none font-bold my-2 print:hidden">
-            미리 보기
-          </h2>
-          <div className="flex-1 min-h-0 overflow-auto">
-            <Preview
-              ref={previewRef}
-              paperWidth={paperWidth}
-              paperHeight={paperHeight}
-              html={html}
-            />
-          </div>
-        </section>
+        <Editor
+          ref={editorRef}
+          value={markdown}
+          onChange={handleEditorChange}
+          onSave={handleSave}
+          onSaveAs={handleOutput}
+          fileName={fileName}
+          isModified={isModified}
+        />
+        <Preview
+          ref={previewRef}
+          html={html}
+          paperWidth={paperWidth}
+          paperHeight={paperHeight}
+          paperSize={paperSize}
+        />
       </main>
       {/* 인쇄용 스타일 */}
       <style jsx global>{`

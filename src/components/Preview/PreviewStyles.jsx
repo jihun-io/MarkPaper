@@ -1,4 +1,10 @@
-export default function Preview({ previewRef, paperWidth, paperHeight, html }) {
+export default function PreviewStyles({
+  previewRef,
+  paperWidth,
+  paperHeight,
+  html,
+}) {
+  console.log(html);
   return (
     <div
       ref={previewRef}
