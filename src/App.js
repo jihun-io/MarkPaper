@@ -232,6 +232,49 @@ const App = () => {
     }
   };
 
+  useEffect(() => {
+    const handleBeforeUnload = async (e) => {
+      if (!isModified) return; // 수정사항 없으면 바로 종료
+
+      e.preventDefault();
+      e.stopImmediatePropagation(); // 이벤트 전파 중단
+
+      const response = await window.electronAPI.showCloseConfirmation();
+
+      if (response === 0) {
+        // 저장 후 종료
+        try {
+          if (filePath) {
+            await window.electronAPI.saveFile(filePath, markdown);
+            setIsModified(false); // 저장 완료 후 상태 업데이트
+            window.close();
+          } else {
+            const saveResult = await window.electronAPI.showSaveDialog({
+              defaultPath: fileName,
+              filters: [{ name: "Markdown", extensions: ["md"] }],
+            });
+
+            if (!saveResult.canceled && saveResult.filePath) {
+              await window.electronAPI.saveFile(saveResult.filePath, markdown);
+              setIsModified(false); // 저장 완료 후 상태 업데이트
+              window.close();
+            }
+          }
+        } catch (error) {
+          console.error("저장 실패:", error);
+        }
+      } else if (response === 1) {
+        // 저장하지 않고 종료
+        setIsModified(false); // 강제로 수정 상태 해제
+        window.close();
+      }
+      // 취소는 아무 동작 하지 않음
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isModified, filePath, fileName, markdown]);
+
   // 상태 변화 모니터링을 위한 useEffect 추가
   useEffect(() => {
     console.log("fileName updated:", fileName);

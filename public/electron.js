@@ -213,6 +213,17 @@ ipcMain.handle("dialog:showOpen", async (event, options) => {
   });
 });
 
+ipcMain.handle("show-close-confirmation", async () => {
+  const { response } = await dialog.showMessageBox({
+    type: "question",
+    buttons: ["저장 후 종료", "저장하지 않고 종료", "취소"],
+    defaultId: 0,
+    title: "저장되지 않은 변경사항",
+    message: "저장되지 않은 변경사항이 있습니다. 저장하시겠습니까?",
+  });
+  return response;
+});
+
 app.on("window-all-closed", () => {
   // Windows에서 모든 창이 닫히면 앱 종료
   if (process.platform !== "darwin") {
