@@ -316,13 +316,16 @@ const App = () => {
 
   if (!isOpened) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <button onClick={() => setIsOpened(true)} className="p-4 rounded">
+      <div className="flex items-center justify-center h-screen gap-x-4">
+        <button
+          onClick={() => setIsOpened(true)}
+          className="p-4 rounded hover:bg-arapawa-50 transition-colors active:bg-arapawa-100"
+        >
           새 문서 작성하기
         </button>
         <button
           onClick={handleLoad}
-          className="p-4 bg-blue-500 text-white rounded"
+          className="p-4 bg-arapawa-500 text-white rounded transition-colors hover:bg-arapawa-800 active:bg-arapawa-900"
         >
           문서 로드하기
         </button>
@@ -330,18 +333,21 @@ const App = () => {
     );
   }
 
+  const buttonClass =
+    "p-2 flex items-center gap-2 rounded hover:bg-arapawa-50 active:bg-arapawa-100 transition-colors";
+
   return (
-    <div className="w-full h-screen flex flex-col overflow-hidden">
+    <div className="text-sm w-full h-screen flex flex-col overflow-hidden">
       {/* 상단 컨트롤러바 */}
-      <header className="flex-none mb-4 px-4 pt-4">
+      <header className="flex-none flex items-center px-4 py-2">
         {/* padding 분리 */}
-        <div className="w-full mb-4 flex flex-row items-center justify-between gap-4 flex-1">
-          <div className="flex gap-4">
-            <button onClick={handleSave} className="flex items-center gap-2">
+        <div className="w-full flex flex-row items-center justify-between gap-4 flex-1">
+          <div className="flex gap-2">
+            <button onClick={handleSave} className={buttonClass}>
               <Save className="w-4 h-4" />
               저장
             </button>
-            <button onClick={handleOutput} className="flex items-center gap-2">
+            <button onClick={handleOutput} className={buttonClass}>
               <FileOutput className="w-4 h-4" />
               다른 이름으로 저장
             </button>
@@ -368,7 +374,7 @@ const App = () => {
                 </option>
               ))}
             </select>
-            <button onClick={handlePrint} className="flex items-center gap-2">
+            <button onClick={handlePrint} className={buttonClass}>
               <Printer className="w-4 h-4" />
               인쇄
             </button>
@@ -376,11 +382,11 @@ const App = () => {
         </div>
       </header>
       {/* 메인 콘텐츠 영역 */}
-      <main className="flex-1 min-h-0 flex flex-row gap-4 px-4 pb-4">
+      <main className="flex-1 min-h-0 flex flex-row gap-4 px-4 pb-4 bg-gray-100">
         {/* padding 분리, min-h-0 추가 */}
         {/* 편집기 */}
         <section className="print:hidden flex-1 min-w-0 flex flex-col">
-          <h2 className="flex-none text-lg font-bold mb-2">Markdown</h2>
+          <h2 className="text-sm flex-none font-bold my-2">Markdown</h2>
           <div className="flex-1 min-h-0">
             <Editor
               height="100%"
@@ -407,7 +413,7 @@ const App = () => {
           className="print:p-0 print:shadow-none print:w-full flex-none flex flex-col min-w-0"
           style={{ width: `${paperWidth * 0.6}mm` }}
         >
-          <h2 className="flex-none text-lg font-bold mb-2 print:hidden">
+          <h2 className="text-sm flex-none font-bold my-2 print:hidden">
             미리 보기
           </h2>
           <div className="flex-1 min-h-0 overflow-auto">
