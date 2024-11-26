@@ -50,9 +50,15 @@
 :root {
   --background: #ffffff;
   --foreground: #000000;
+  --primary: #271b97;
+  --light: #f3f4ff;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
+}
+
+button {
+  cursor: default;
 }
