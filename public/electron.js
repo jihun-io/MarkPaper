@@ -51,12 +51,12 @@ function createMenuTemplate() {
       role: "fileMenu",
       submenu: [
         {
-          label: "새로운 윈도우",
+          label: "신규...",
           accelerator: "CmdOrCtrl+N",
           click: () => createWindow(),
         },
         {
-          label: "열기",
+          label: "열기...",
           accelerator: "CmdOrCtrl+O",
           click: async (menuItem, browserWindow) => {
             const result = await dialog.showOpenDialog(browserWindow, {
