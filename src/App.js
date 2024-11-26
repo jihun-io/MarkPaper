@@ -58,6 +58,21 @@ const App = () => {
         updateDocument(content);
         setIsOpened(true);
         setIsModified(false);
+
+        // 스타일 태그 파싱
+        const styleTagMatch = content.match(/<style>([\s\S]*?)<\/style>/);
+        if (styleTagMatch) {
+          const styleContent = styleTagMatch[1];
+          const fontFamilyMatch = styleContent.match(/font-family:\s*([^;]+);/);
+          const fontSizeMatch = styleContent.match(/font-size:\s*([^;]+);/);
+
+          if (fontFamilyMatch) {
+            setFont(fontFamilyMatch[1].trim());
+          }
+          if (fontSizeMatch) {
+            setFontSize(parseInt(fontSizeMatch[1].trim()));
+          }
+        }
       }
     } catch (error) {
       console.error("파일 로드 실패:", error);
