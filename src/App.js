@@ -7,6 +7,7 @@ import { useFileStore } from "./store/fileStore";
 import { updateFontFamily, updateFontSize } from "./utils/styles";
 import { PAPER_SIZES } from "./constants";
 import { Toolbar } from "./components/Toolbar";
+import { Logo } from "./svgs/Logo";
 
 const parseStyleTag = (content, setFont, setFontSize) => {
   const styleTagMatch = content.match(/<style>([\s\S]*?)<\/style>/);
@@ -327,7 +328,8 @@ const App = () => {
     return (
       <div className="flex flex-col justify-around h-screen">
         <h1 className="flex justify-center">
-          <img width="240" src="/images/MarkPaper.svg" alt="MarkPaper" />
+          <Logo className="w-64" />
+          <span className="sr-only">MarkPaper</span>
         </h1>
         <ul className="flex items-center justify-center gap-x-8">
           <li>
