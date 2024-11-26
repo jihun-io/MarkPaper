@@ -102,7 +102,31 @@ const App = () => {
     }
   }, [filePath, markdown, handleOutput]);
 
-  // 파일 로드 핸들러
+  // 창에서 파일 불러오기 핸들러
+  const handleLoad = useCallback(async () => {
+    try {
+      const result = await window.electronAPI.showOpenDialog({
+        properties: ["openFile"],
+        filters: [{ name: "Markdown", extensions: ["md"] }],
+      });
+
+      if (!result.canceled && result.filePaths.length > 0) {
+        const content = await window.electronAPI.readFile(result.filePaths[0]);
+        setFilePath(result.filePaths[0]);
+        setFileName(result.filePaths[0].split("/").pop());
+        updateDocument(content);
+        setIsOpened(true);
+        setIsModified(false);
+
+        // 스타일 태그 파싱
+        parseStyleTag(content, setFont, setFontSize);
+      }
+    } catch (error) {
+      console.error("파일 로드 실패:", error);
+    }
+  }, []);
+
+  // 메뉴 바에서 파일 로드 핸들러
   const handleLoadFile = async (filePath) => {
     try {
       const content = await window.electronAPI.readFile(filePath);
@@ -305,7 +329,7 @@ const App = () => {
           새 문서 작성하기
         </button>
         <button
-          onClick={handleLoadFile}
+          onClick={handleLoad}
           className="p-4 bg-arapawa-500 text-white rounded transition-colors hover:bg-arapawa-800 active:bg-arapawa-900"
         >
           문서 불러오기
