@@ -19,4 +19,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
   removeMenuSaveAsListener: () => ipcRenderer.removeAllListeners("menu:saveAs"),
   onMenuPrint: (callback) => ipcRenderer.on("menu:print", callback),
   removeMenuPrintListener: () => ipcRenderer.removeAllListeners("menu:print"),
+  closeWindow: () => ipcRenderer.send("close-window"),
 });

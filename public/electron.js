@@ -178,14 +178,20 @@ ipcMain.handle("window:create", () => {
 });
 
 ipcMain.handle("print-to-pdf", async (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win) return { success: false, error: "Window not found" };
+
   const pdfPath = path.join(app.getPath("documents"), "print.pdf");
-  const browserWindow = BrowserWindow.fromWebContents(event.sender);
 
   try {
-    const data = await browserWindow.webContents.printToPDF({});
+    const data = await win.webContents.printToPDF({});
     await fs.writeFile(pdfPath, data);
 
-    const pdfWindow = new BrowserWindow({ width: 800, height: 600 });
+    const pdfWindow = new BrowserWindow({
+      width: 800,
+      height: 600,
+      parent: win, // 부모 창 설정
+    });
     pdfWindow.title = "인쇄 및 저장";
     pdfWindow.loadURL("file://" + pdfPath);
 
@@ -217,22 +223,30 @@ ipcMain.handle("read-file", async (event, filePath) => {
 });
 
 ipcMain.handle("dialog:showSave", async (event, options) => {
-  const result = await dialog.showSaveDialog({
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win) return { canceled: true };
+
+  return dialog.showSaveDialog(win, {
     defaultPath: options.defaultPath,
     filters: options.filters,
   });
-  return result;
 });
 
 ipcMain.handle("dialog:showOpen", async (event, options) => {
-  return dialog.showOpenDialog({
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win) return { canceled: true };
+
+  return dialog.showOpenDialog(win, {
     properties: options.properties,
     filters: options.filters,
   });
 });
 
-ipcMain.handle("show-close-confirmation", async () => {
-  const { response } = await dialog.showMessageBox({
+ipcMain.handle("show-close-confirmation", async (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win) return;
+
+  const { response } = await dialog.showMessageBox(win, {
     type: "question",
     buttons: ["저장 후 종료", "저장하지 않고 종료", "취소"],
     defaultId: 0,
@@ -242,8 +256,15 @@ ipcMain.handle("show-close-confirmation", async () => {
   return response;
 });
 
+ipcMain.on("close-window", (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (win) {
+    win.close();
+  }
+});
+
 app.on("window-all-closed", () => {
-  // Windows에서 모든 창이 닫히면 앱 종료
+  windows.clear(); // Set 초기화
   if (process.platform !== "darwin") {
     app.quit();
   }

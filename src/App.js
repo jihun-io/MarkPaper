@@ -29,6 +29,64 @@ const App = () => {
   const previewRef = useRef(null);
   const editorRef = useRef(null);
 
+  // 저장 후 종료 처리를 위한 새로운 함수
+  const handleSaveAndClose = async () => {
+    let saved = false;
+
+    if (filePath) {
+      // 기존 파일이 있는 경우
+      saved = await handleSave();
+    } else {
+      // 새 문서인 경우
+      const saveResult = await window.electronAPI.showSaveDialog({
+        defaultPath: fileName,
+        filters: [{ name: "Markdown", extensions: ["md"] }],
+      });
+
+      if (!saveResult.canceled && saveResult.filePath) {
+        try {
+          await window.electronAPI.saveFile(saveResult.filePath, markdown);
+          setFilePath(saveResult.filePath);
+          setFileName(saveResult.filePath.split("/").pop());
+          setIsModified(false);
+          saved = true;
+        } catch (error) {
+          console.error("저장 실패:", error);
+          saved = false;
+        }
+      }
+    }
+
+    if (saved) {
+      window.electronAPI.closeWindow();
+    }
+  };
+
+  const handleOutput = async () => {
+    try {
+      // electronAPI를 통해 저장 경로 선택
+      const { filePath, canceled } = await window.electronAPI.showSaveDialog({
+        defaultPath: fileName,
+        filters: [{ name: "Markdown", extensions: ["md"] }],
+      });
+
+      if (!canceled && filePath) {
+        // 선택된 경로 저장
+        setFilePath(filePath);
+
+        // 파일 저장
+        await window.electronAPI.saveFile(filePath, markdown);
+
+        // 파일 이름 업데이트
+        const newFileName = filePath.split("/").pop();
+        setFileName(newFileName);
+        setIsModified(false);
+      }
+    } catch (error) {
+      console.error("파일 저장 실패:", error);
+    }
+  };
+
   // 파일 저장 핸들러
   const handleSave = useCallback(async () => {
     if (!filePath) {
@@ -37,10 +95,12 @@ const App = () => {
     try {
       await window.electronAPI.saveFile(filePath, markdown);
       setIsModified(false);
+      return true; // 저장 성공 시 true 반환
     } catch (error) {
       console.error("파일 저장 실패:", error);
+      return false; // 저장 실패 시 false 반환
     }
-  }, [filePath, markdown]);
+  }, [filePath, markdown, handleOutput]);
 
   // 파일 로드 핸들러
   const handleLoad = useCallback(async () => {
@@ -138,73 +198,37 @@ const App = () => {
     }
   };
 
-  const handleOutput = async () => {
-    try {
-      // electronAPI를 통해 저장 경로 선택
-      const { filePath, canceled } = await window.electronAPI.showSaveDialog({
-        defaultPath: fileName,
-        filters: [{ name: "Markdown", extensions: ["md"] }],
-      });
-
-      if (!canceled && filePath) {
-        // 선택된 경로 저장
-        setFilePath(filePath);
-
-        // 파일 저장
-        await window.electronAPI.saveFile(filePath, markdown);
-
-        // 파일 이름 업데이트
-        const newFileName = filePath.split("/").pop();
-        setFileName(newFileName);
-        setIsModified(false);
-      }
-    } catch (error) {
-      console.error("파일 저장 실패:", error);
-    }
-  };
-
+  // beforeunload 이벤트 핸들러 수정
   useEffect(() => {
     const handleBeforeUnload = async (e) => {
-      if (!isModified) return; // 수정사항 없으면 바로 종료
+      if (!isModified) {
+        window.electronAPI.closeWindow();
+        return;
+      }
 
       e.preventDefault();
-      e.stopImmediatePropagation(); // 이벤트 전파 중단
+      e.returnValue = false;
 
       const response = await window.electronAPI.showCloseConfirmation();
 
       if (response === 0) {
         // 저장 후 종료
-        try {
-          if (filePath) {
-            await window.electronAPI.saveFile(filePath, markdown);
-            setIsModified(false); // 저장 완료 후 상태 업데이트
-            window.close();
-          } else {
-            const saveResult = await window.electronAPI.showSaveDialog({
-              defaultPath: fileName,
-              filters: [{ name: "Markdown", extensions: ["md"] }],
-            });
-
-            if (!saveResult.canceled && saveResult.filePath) {
-              await window.electronAPI.saveFile(saveResult.filePath, markdown);
-              setIsModified(false); // 저장 완료 후 상태 업데이트
-              window.close();
-            }
-          }
-        } catch (error) {
-          console.error("저장 실패:", error);
+        const saved = await handleSaveAndClose();
+        if (!saved) {
+          // 저장이 실패하거나 취소된 경우 종료하지 않음
+          return;
         }
       } else if (response === 1) {
         // 저장하지 않고 종료
-        setIsModified(false); // 강제로 수정 상태 해제
-        window.close();
+        setIsModified(false);
+        window.electronAPI.closeWindow();
       }
-      // 취소는 아무 동작 하지 않음
+      // response === 2 (취소)인 경우 아무것도 하지 않음
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isModified, filePath, fileName, markdown]);
+  }, [isModified, handleSaveAndClose, setIsModified]);
 
   // 상태 변화 모니터링을 위한 useEffect 추가
   useEffect(() => {
