@@ -18,6 +18,12 @@ const PAPER_SIZES = {
   Legal: { width: 215.9, height: 355.6 },
 };
 
+const FONTS = {
+  Pretendard: "Pretendard",
+  SourceHanSerif: "본명조",
+  KoddiUDOnGothic: "Koddi UD 온고딕",
+};
+
 // Tailwind 클래스들을 허용하도록 sanitize 스키마 확장
 const schema = {
   ...defaultSchema,
@@ -98,6 +104,49 @@ const convertToHtml = async (markdown) => {
   return result.toString();
 };
 
+// font-family CSS 규칙 생성/교체 함수
+const updateFontFamily = (content, fontFamily) => {
+  const styleRegex = /<style>\s*([\s\S]*?)\s*<\/style>/;
+  const proseFontRegex = /\.prose\s*{[^}]*font-family:[^}]*}/;
+  const newFontRule = `.prose {\n  font-family: ${fontFamily};\n}`;
+
+  // style 태그가 있는 경우
+  if (styleRegex.test(content)) {
+    // .prose의 font-family 규칙이 있는 경우
+    if (proseFontRegex.test(content)) {
+      return content.replace(proseFontRegex, newFontRule);
+    }
+    // style 태그는 있지만 font-family 규칙이 없는 경우
+    return content.replace(styleRegex, (match, p1) => {
+      return `<style>\n${p1}${p1 ? "\n" : ""}${newFontRule}\n</style>`;
+    });
+  }
+
+  // style 태그가 없는 경우 - 문서 최상단에 삽입
+  return `<style>\n${newFontRule}\n</style>\n\n${content}`;
+};
+
+const updateFontSize = (content, fontSize) => {
+  const styleRegex = /<style>\s*([\s\S]*?)\s*<\/style>/;
+  const proseFontRegex = /\.prose\s*{[^}]*font-size:[^}]*}/;
+  const newFontRule = `.prose {\n  font-size: ${fontSize}px;\n}`;
+
+  // style 태그가 있는 경우
+  if (styleRegex.test(content)) {
+    // .prose의 font-size 규칙이 있는 경우
+    if (proseFontRegex.test(content)) {
+      return content.replace(proseFontRegex, newFontRule);
+    }
+    // style 태그는 있지만 font-size 규칙이 없는 경우
+    return content.replace(styleRegex, (match, p1) => {
+      return `<style>\n${p1}${p1 ? "\n" : ""}${newFontRule}\n</style>`;
+    });
+  }
+
+  // style 태그가 없는 경우 - 문서 최상단에 삽입
+  return `<style>\n${newFontRule}\n</style>\n\n${content}`;
+};
+
 const App = () => {
   const [isOpened, setIsOpened] = useState(false);
   const [fileName, setFileName] = useState("새 문서");
@@ -106,6 +155,8 @@ const App = () => {
   const [markdown, setMarkdown] = useState("");
   const [html, setHtml] = useState("");
   const [paperSize, setPaperSize] = useState("A4");
+  const [currentFont, setCurrentFont] = useState("Pretendard");
+  const [currentFontSize, setCurrentFontSize] = useState(12);
   const previewRef = useRef(null);
   const editorRef = useRef(null);
 
@@ -310,6 +361,62 @@ const App = () => {
     };
   }, [handlePrint]);
 
+  // 서체 변경 핸들러
+  const handleFontChange = (e) => {
+    const fontKey = e.target.value;
+    setCurrentFont(FONTS[fontKey]);
+
+    if (editorRef.current) {
+      const model = editorRef.current.getModel();
+      const content = model.getValue();
+
+      const updatedContent = updateFontFamily(content, fontKey);
+
+      // 에디터 전체 내용 교체
+      model.pushEditOperations(
+        [],
+        [
+          {
+            range: model.getFullModelRange(),
+            text: updatedContent,
+          },
+        ],
+        () => null
+      );
+
+      // HTML 미리보기 업데이트
+      handleEditorChange(updatedContent);
+    }
+  };
+
+  // 서체 크기 변경 핸들러
+  const handleFontSizeChange = (e) => {
+    const fontSize = e.target.value;
+    setCurrentFontSize(fontSize);
+
+    if (editorRef.current) {
+      const model = editorRef.current.getModel();
+      const content = model.getValue();
+
+      const updatedContent = updateFontSize(content, fontSize);
+
+      // 에디터 전체 내용 교체
+      model.pushEditOperations(
+        [],
+        [
+          {
+            range: model.getFullModelRange(),
+            text: updatedContent,
+          },
+        ],
+        () => null
+      );
+
+      // HTML 미리보기 업데이트
+      handleEditorChange(updatedContent);
+    }
+  };
+
   const currentPaperSize = PAPER_SIZES[paperSize];
   const paperWidth = currentPaperSize.width;
   const paperHeight = currentPaperSize.height;
@@ -363,6 +470,27 @@ const App = () => {
             )}
           </div>
           <div className="flex gap-4">
+            <select
+              value={Object.keys(FONTS).find(
+                (key) => FONTS[key] === currentFont
+              )}
+              onChange={handleFontChange}
+              className="px-2 border rounded"
+            >
+              {Object.keys(FONTS).map((font) => (
+                <option key={font} value={font}>
+                  {FONTS[font]}
+                </option>
+              ))}
+            </select>
+            <input
+              className="p-2 border rounded w-[4rem]"
+              type="number"
+              name="fontSize"
+              id="fontSize"
+              value={currentFontSize}
+              onChange={(e) => handleFontSizeChange(e)}
+            />
             <select
               value={paperSize}
               onChange={(e) => setPaperSize(e.target.value)}
