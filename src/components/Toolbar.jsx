@@ -7,7 +7,7 @@ import { useStyleStore } from "../store/styleStore";
 import { PAPER_SIZES, FONTS } from "../constants";
 
 const buttonClass =
-  "p-2 flex items-center gap-2 rounded hover:bg-arapawa-50 active:bg-arapawa-100 transition-colors";
+  "px-4 py-2 flex flex-col items-center gap-y-1 rounded hover:bg-arapawa-50 active:bg-arapawa-100 transition-colors";
 
 export const Toolbar = ({
   onSave,
@@ -50,7 +50,7 @@ export const Toolbar = ({
   };
 
   return (
-    <header className="flex-none flex items-center px-4 py-2">
+    <header className="flex-none flex items-center px-4 py-2 text-[12px]">
       <div className="w-full flex flex-row items-center justify-between gap-4 flex-1">
         <div className="flex gap-2">
           <button onClick={onSave} className={buttonClass}>
@@ -63,7 +63,7 @@ export const Toolbar = ({
           </button>
           <button onClick={handleImageClick} className={buttonClass}>
             <ImagePlus className="w-4 h-4" />
-            이미지 첨부
+            사진 추가
           </button>
           <input
             ref={fileInputRef}
@@ -83,11 +83,11 @@ export const Toolbar = ({
             <p>{fileName}</p>
           )}
         </div>
-        <div className="flex gap-4">
+        <div className="flex items-center gap-4">
           <select
             value={currentFont}
             onChange={onFontChange}
-            className="px-2 border rounded"
+            className="p-2 h-8 flex items-center border rounded"
           >
             {Object.entries(FONTS).map(([key, value]) => (
               <option key={key} value={key}>
@@ -96,7 +96,7 @@ export const Toolbar = ({
             ))}
           </select>
           <input
-            className="p-2 border rounded w-[4rem]"
+            className="p-2 h-8 flex items-center border rounded w-[4rem]"
             type="number"
             min="8"
             max="72"
@@ -108,7 +108,7 @@ export const Toolbar = ({
           <select
             value={paperSize}
             onChange={(e) => setPaperSize(e.target.value)}
-            className="p-2 border rounded"
+            className="p-2 h-8 flex items-center border rounded"
           >
             {Object.keys(PAPER_SIZES).map((size) => (
               <option key={size} value={size}>
