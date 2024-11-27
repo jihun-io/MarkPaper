@@ -26,8 +26,15 @@ const parseStyleTag = (content, setFont, setFontSize) => {
 };
 
 const App = () => {
-  const { markdown, html, setMarkdown, setHtml, updateDocument } =
-    useDocumentStore();
+  const {
+    markdown,
+    html,
+    setMarkdown,
+    setHtml,
+    updateDocument,
+    addImage,
+    getImagesData,
+  } = useDocumentStore();
 
   const { paperSize, currentFont, currentFontSize, setFont, setFontSize } =
     useStyleStore();
@@ -41,20 +48,85 @@ const App = () => {
     setFileName,
     setFilePath,
     setIsModified,
+    prepareFileData,
+    loadFileData,
   } = useFileStore();
 
   const previewRef = useRef(null);
   const editorRef = useRef(null);
 
+  const handleOutput = useCallback(async () => {
+    try {
+      const { filePath: newFilePath, canceled } =
+        await window.electronAPI.showSaveDialog({
+          defaultPath: fileName,
+          filters: [
+            { name: "MarkPaper", extensions: ["mp"] },
+            { name: "Markdown", extensions: ["md"] },
+          ],
+        });
+
+      if (!canceled && newFilePath) {
+        setFilePath(newFilePath);
+        const imageData = getImagesData();
+        const isMP = newFilePath.toLowerCase().endsWith(".mp");
+        const fileData = isMP
+          ? await prepareFileData(markdown, imageData)
+          : markdown;
+
+        await window.electronAPI.saveFile(newFilePath, fileData);
+        const newFileName = newFilePath.split("/").pop();
+        setFileName(newFileName);
+        setIsModified(false);
+      }
+    } catch (error) {
+      console.error("파일 저장 실패:", error);
+    }
+  }, [
+    fileName,
+    markdown,
+    setFilePath,
+    setFileName,
+    setIsModified,
+    getImagesData,
+    prepareFileData,
+  ]);
+
+  const handleSave = useCallback(async () => {
+    if (!filePath) {
+      return handleOutput();
+    }
+    try {
+      const isMP = filePath.toLowerCase().endsWith(".mp");
+      const imageData = getImagesData();
+
+      const fileData = isMP
+        ? await prepareFileData(markdown, imageData)
+        : markdown;
+
+      await window.electronAPI.saveFile(filePath, fileData);
+      setIsModified(false);
+      return true;
+    } catch (error) {
+      console.error("파일 저장 실패:", error);
+      return false;
+    }
+  }, [
+    filePath,
+    markdown,
+    getImagesData,
+    prepareFileData,
+    handleOutput,
+    setIsModified,
+  ]);
+
   // 저장 후 종료 처리를 위한 새로운 함수
-  const handleSaveAndClose = async () => {
+  const handleSaveAndClose = useCallback(async () => {
     let saved = false;
 
     if (filePath) {
-      // 기존 파일이 있는 경우
       saved = await handleSave();
     } else {
-      // 새 문서인 경우
       const saveResult = await window.electronAPI.showSaveDialog({
         defaultPath: fileName,
         filters: [{ name: "Markdown", extensions: ["md"] }],
@@ -77,88 +149,63 @@ const App = () => {
     if (saved) {
       window.electronAPI.closeWindow();
     }
-  };
-
-  const handleOutput = async () => {
-    try {
-      // electronAPI를 통해 저장 경로 선택
-      const { filePath, canceled } = await window.electronAPI.showSaveDialog({
-        defaultPath: fileName,
-        filters: [{ name: "Markdown", extensions: ["md"] }],
-      });
-
-      if (!canceled && filePath) {
-        // 선택된 경로 저장
-        setFilePath(filePath);
-
-        // 파일 저장
-        await window.electronAPI.saveFile(filePath, markdown);
-
-        // 파일 이름 업데이트
-        const newFileName = filePath.split("/").pop();
-        setFileName(newFileName);
-        setIsModified(false);
-      }
-    } catch (error) {
-      console.error("파일 저장 실패:", error);
-    }
-  };
-
-  // 파일 저장 핸들러
-  const handleSave = useCallback(async () => {
-    if (!filePath) {
-      return handleOutput();
-    }
-    try {
-      await window.electronAPI.saveFile(filePath, markdown);
-      setIsModified(false);
-      return true; // 저장 성공 시 true 반환
-    } catch (error) {
-      console.error("파일 저장 실패:", error);
-      return false; // 저장 실패 시 false 반환
-    }
-  }, [filePath, markdown, handleOutput]);
-
-  // 창에서 파일 불러오기 핸들러
-  const handleLoad = useCallback(async () => {
-    try {
-      const result = await window.electronAPI.showOpenDialog({
-        properties: ["openFile"],
-        filters: [{ name: "Markdown", extensions: ["md"] }],
-      });
-
-      if (!result.canceled && result.filePaths.length > 0) {
-        const content = await window.electronAPI.readFile(result.filePaths[0]);
-        setFilePath(result.filePaths[0]);
-        setFileName(result.filePaths[0].split("/").pop());
-        updateDocument(content);
-        setIsOpened(true);
-        setIsModified(false);
-
-        // 스타일 태그 파싱
-        parseStyleTag(content, setFont, setFontSize);
-      }
-    } catch (error) {
-      console.error("파일 로드 실패:", error);
-    }
-  }, []);
+  }, [
+    filePath,
+    fileName,
+    markdown,
+    handleSave,
+    setFilePath,
+    setFileName,
+    setIsModified,
+  ]);
 
   // 메뉴 바에서 파일 로드 핸들러
   const handleLoadFile = async (filePath) => {
     try {
-      const content = await window.electronAPI.readFile(filePath);
+      const fileBuffer = await window.electronAPI.readFile(filePath, true);
+      const { content, metadata, images } = await loadFileData(
+        fileBuffer,
+        filePath
+      );
+
+      // DocumentStore에 이미지 추가
+      if (images && images.length > 0) {
+        for (const { filename, file } of images) {
+          await addImage(file);
+        }
+      }
+
       setFilePath(filePath);
       setFileName(filePath.split("/").pop());
       updateDocument(content);
       setIsOpened(true);
       setIsModified(false);
 
-      // 스타일 태그 파싱
       parseStyleTag(content, setFont, setFontSize);
     } catch (error) {
       console.error("파일 로드 실패:", error);
     }
   };
+
+  // 창에서 파일 불러오기 핸들러
+  const handleLoad = useCallback(async () => {
+    try {
+      const result = await window.electronAPI.showOpenDialog({
+        properties: ["openFile"],
+        filters: [
+          { name: "MarkPaper & Markdown", extensions: ["mp", "md"] },
+          { name: "MarkPaper", extensions: ["mp"] },
+          { name: "Markdown", extensions: ["md"] },
+        ],
+      });
+
+      if (!result.canceled && result.filePaths.length > 0) {
+        await handleLoadFile(result.filePaths[0]);
+      }
+    } catch (error) {
+      console.error("파일 로드 실패:", error);
+    }
+  }, [handleLoadFile]);
 
   const handlePrint = useCallback(() => {
     window.electronAPI.printToPDF();
@@ -320,6 +367,15 @@ const App = () => {
     }
   };
 
+  const handleImageUpload = async (file) => {
+    const { id, markdownText } = await addImage(file);
+
+    // 현재 markdown 내용에 이미지 마크다운 추가
+    const newMarkdown = markdown + "\n" + markdownText + "\n";
+    await updateDocument(newMarkdown);
+    setIsModified(true);
+  };
+
   const currentPaperSize = PAPER_SIZES[paperSize];
   const paperWidth = currentPaperSize.width;
   const paperHeight = currentPaperSize.height;
@@ -357,6 +413,7 @@ const App = () => {
       <Toolbar
         onSave={handleSave}
         onSaveAs={handleOutput}
+        onImageUpload={handleImageUpload}
         fileName={fileName}
         isModified={isModified}
         onPrint={handlePrint}

@@ -1,8 +1,8 @@
-// src/components/Toolbar.jsx
-import React from "react";
+import React, { useRef } from "react";
 import Save from "lucide-react/dist/esm/icons/save";
 import FileOutput from "lucide-react/dist/esm/icons/file-output";
 import Printer from "lucide-react/dist/esm/icons/printer";
+import ImagePlus from "lucide-react/dist/esm/icons/image-plus";
 import { useStyleStore } from "../store/styleStore";
 import { PAPER_SIZES, FONTS } from "../constants";
 
@@ -19,18 +19,38 @@ export const Toolbar = ({
   onFontSizeChange,
   currentFont,
   currentFontSize,
+  onImageUpload, // 새로운 prop 추가
 }) => {
   const { paperSize, setPaperSize } = useStyleStore();
+  const fileInputRef = useRef(null);
 
   const handleFontSizeChange = (e) => {
-    // 문자열을 숫자로 변환
     const newSize = parseInt(e.target.value, 10);
     onFontSizeChange(newSize);
   };
 
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 이미지 파일 타입 검사
+    if (!file.type.startsWith("image/")) {
+      alert("이미지 파일만 업로드할 수 있습니다.");
+      return;
+    }
+
+    await onImageUpload?.(file);
+
+    // 파일 입력 초기화 (같은 파일을 다시 선택할 수 있도록)
+    e.target.value = "";
+  };
+
   return (
     <header className="flex-none flex items-center px-4 py-2">
-      {/* padding 분리 */}
       <div className="w-full flex flex-row items-center justify-between gap-4 flex-1">
         <div className="flex gap-2">
           <button onClick={onSave} className={buttonClass}>
@@ -41,6 +61,17 @@ export const Toolbar = ({
             <FileOutput className="w-4 h-4" />
             다른 이름으로 저장
           </button>
+          <button onClick={handleImageClick} className={buttonClass}>
+            <ImagePlus className="w-4 h-4" />
+            이미지 첨부
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="hidden"
+          />
         </div>
         <div>
           {isModified ? (
@@ -54,7 +85,7 @@ export const Toolbar = ({
         </div>
         <div className="flex gap-4">
           <select
-            value={currentFont} // 직접 key 사용
+            value={currentFont}
             onChange={onFontChange}
             className="px-2 border rounded"
           >

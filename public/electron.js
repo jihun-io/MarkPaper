@@ -5,11 +5,12 @@ const fs = require("fs").promises;
 // 창 관리를 위한 배열
 const windows = new Set();
 
-// 파일 연결 설정
+// 파일 연결 설정 함수
 function setupFileAssociations() {
-  // .md 파일 확장자 연결
   if (process.platform === "win32") {
     app.setAsDefaultProtocolClient("markdown");
+    // MP 파일 확장자 연결 추가
+    app.setAsDefaultProtocolClient("markpaper");
   }
 }
 
@@ -84,7 +85,11 @@ function createMenuTemplate() {
           click: async (menuItem, browserWindow) => {
             const result = await dialog.showOpenDialog(browserWindow, {
               properties: ["openFile"],
-              filters: [{ name: "Markdown 파일", extensions: ["md"] }],
+              filters: [
+                { name: "모든 지원 형식", extensions: ["mp", "md"] },
+                { name: "MarkPaper 파일", extensions: ["mp"] },
+                { name: "Markdown 파일", extensions: ["md"] },
+              ],
             });
             if (!result.canceled && result.filePaths.length > 0) {
               const newWindow = createWindow();
@@ -220,7 +225,7 @@ app.on("ready", () => {
   }
 });
 
-// 파일 연결 이벤트 처리
+// 파일 확장자 관련 이벤트 처리 수정
 app.on("will-finish-launching", () => {
   // macOS에서 파일 더블클릭으로 열기
   app.on("open-file", (event, filePath) => {
@@ -230,7 +235,9 @@ app.on("will-finish-launching", () => {
 
   // Windows에서 파일 더블클릭으로 열기
   app.on("second-instance", (event, commandLine) => {
-    const fileToOpen = commandLine.find((arg) => arg.endsWith(".md"));
+    const fileToOpen = commandLine.find(
+      (arg) => arg.endsWith(".md") || arg.endsWith(".mp")
+    );
     if (fileToOpen) {
       openFileInWindow(fileToOpen);
     }
@@ -275,9 +282,23 @@ ipcMain.handle("print-to-pdf", async (event) => {
   }
 });
 
+// 파일 처리 IPC 핸들러 수정
 ipcMain.handle("save-file", async (event, filePath, content) => {
   try {
-    await fs.writeFile(filePath, content, { encoding: "utf8" });
+    if (content instanceof Uint8Array || Buffer.isBuffer(content)) {
+      // 바이너리 데이터(.mp 파일)
+      await fs.writeFile(filePath, Buffer.from(content));
+    } else if (content instanceof ArrayBuffer) {
+      // ArrayBuffer(.mp 파일)
+      await fs.writeFile(filePath, Buffer.from(content));
+    } else if (typeof content === "string") {
+      // 문자열(.md 파일)
+      await fs.writeFile(filePath, content, { encoding: "utf8" });
+    } else {
+      // Blob 데이터(.mp 파일)
+      const buffer = Buffer.from(await content.arrayBuffer());
+      await fs.writeFile(filePath, buffer);
+    }
     return true;
   } catch (error) {
     console.error("파일 저장 에러:", error);
@@ -285,34 +306,55 @@ ipcMain.handle("save-file", async (event, filePath, content) => {
   }
 });
 
-ipcMain.handle("read-file", async (event, filePath) => {
+ipcMain.handle("read-file", async (event, filePath, binary = false) => {
   try {
-    const content = await fs.readFile(filePath, { encoding: "utf8" });
-    return content;
+    if (binary) {
+      // 바이너리 모드로 읽기
+      const content = await fs.readFile(filePath);
+      return content;
+    } else {
+      // 텍스트 모드로 읽기
+      const content = await fs.readFile(filePath, { encoding: "utf8" });
+      return content;
+    }
   } catch (error) {
     console.error("파일 읽기 에러:", error);
     throw error;
   }
 });
 
+// 저장 다이얼로그 핸들러 수정
 ipcMain.handle("dialog:showSave", async (event, options) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   if (!win) return { canceled: true };
 
-  return dialog.showSaveDialog(win, {
-    defaultPath: options.defaultPath,
-    filters: options.filters,
-  });
+  const defaultOptions = {
+    filters: [
+      { name: "MarkPaper 파일", extensions: ["mp"] },
+      { name: "Markdown 파일", extensions: ["md"] },
+    ],
+    ...options,
+  };
+
+  return dialog.showSaveDialog(win, defaultOptions);
 });
 
+// 열기 다이얼로그 핸들러 수정
 ipcMain.handle("dialog:showOpen", async (event, options) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   if (!win) return { canceled: true };
 
-  return dialog.showOpenDialog(win, {
-    properties: options.properties,
-    filters: options.filters,
-  });
+  const defaultOptions = {
+    properties: ["openFile"],
+    filters: [
+      { name: "모든 지원 형식", extensions: ["mp", "md"] },
+      { name: "MarkPaper 파일", extensions: ["mp"] },
+      { name: "Markdown 파일", extensions: ["md"] },
+    ],
+    ...options,
+  };
+
+  return dialog.showOpenDialog(win, defaultOptions);
 });
 
 ipcMain.handle("show-close-confirmation", async (event) => {
