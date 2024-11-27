@@ -19,7 +19,7 @@ export const convertToHtml = async (markdown) => {
 
   // 코드블록 외부의 pagebreak 치환
   processedMarkdown = processedMarkdown.replace(
-    "---pagebreak---\n",
+    /---pagebreak---/g,
     '<div class="page-break"></div>'
   );
 
