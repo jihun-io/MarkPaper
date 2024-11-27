@@ -3,10 +3,11 @@
 <h1 style="text-align: center;">MarkPaper</h1>
 <p style="text-align: center;">마크다운으로 시작하는 깔끔한 문서 제작</p>
 
-<img width="800" alt="image" src="https://github.com/user-attachments/assets/f31e30fa-45d1-4c32-8cf2-947c1f29b619">
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/bb12921d-a3b5-400f-9a7d-02ef0c91f58a">
+
 
 ## 1. 프로젝트 소개
-MarkPaper는 마크다운으로 깔끔한 문서를 만들고 인쇄할 수 있는 데스크톱 애플리케이션입니다.
+MarkPaper는 마크다운으로 깔끔한 문서를 만들고 인쇄할 수 있는 애플리케이션입니다.
 
 기존의 마크다운 에디터들은 문서 작성과 미리보기에 초점이 맞춰져 있어, 실제 인쇄물 제작에는 한계가 있었습니다. 특히 서체 선택이나 스타일링과 같은 세부적인 디자인 요소를 조정하기 어려웠죠. MarkPaper는 이러한 한계를 극복하고자 합니다.
 
