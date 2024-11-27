@@ -257,7 +257,9 @@ ipcMain.handle("print-to-pdf", async (event) => {
   const pdfPath = path.join(app.getPath("documents"), "print.pdf");
 
   try {
-    const data = await win.webContents.printToPDF({});
+    const data = await win.webContents.printToPDF({
+      printBackground: true,
+    });
     await fs.writeFile(pdfPath, data);
 
     const pdfWindow = new BrowserWindow({
