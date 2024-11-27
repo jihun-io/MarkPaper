@@ -225,16 +225,14 @@ app.on("will-finish-launching", () => {
   // macOS에서 파일 더블클릭으로 열기
   app.on("open-file", (event, filePath) => {
     event.preventDefault();
-    const existingWindow = BrowserWindow.getAllWindows()[0];
-    openFileInWindow(filePath, existingWindow);
+    openFileInWindow(filePath);
   });
 
   // Windows에서 파일 더블클릭으로 열기
   app.on("second-instance", (event, commandLine) => {
     const fileToOpen = commandLine.find((arg) => arg.endsWith(".md"));
     if (fileToOpen) {
-      const existingWindow = BrowserWindow.getAllWindows()[0];
-      openFileInWindow(fileToOpen, existingWindow);
+      openFileInWindow(fileToOpen);
     }
   });
 });
