@@ -9,23 +9,31 @@ import rehypeStringify from "rehype-stringify";
 import { schema } from "./schema";
 
 export const convertToHtml = async (markdown) => {
-  // 코드블록 부분을 임시로 치환
-  let codeBlocks = [];
-  let codeBlockCounter = 0;
-  let processedMarkdown = markdown.replace(/```[\s\S]*?```/g, (match) => {
-    codeBlocks.push(match);
-    return `CODE_BLOCK_${codeBlockCounter++}`;
-  });
+  let placeholders = [];
+  let counter = 0;
 
-  // 코드블록 외부의 pagebreak 치환
+  // 코드블록과 인라인 코드를 모두 임시 치환
+  let processedMarkdown = markdown
+    // 코드블록 치환 (```)
+    .replace(/```[\s\S]*?```/g, (match) => {
+      placeholders.push(match);
+      return `PLACEHOLDER_${counter++}`;
+    })
+    // 인라인 코드 치환 (`)
+    .replace(/`[^`]+`/g, (match) => {
+      placeholders.push(match);
+      return `PLACEHOLDER_${counter++}`;
+    });
+
+  // 코드 외부의 pagebreak 치환
   processedMarkdown = processedMarkdown.replace(
     /---pagebreak---/g,
     '<div class="page-break"></div>'
   );
 
-  // 코드블록 복원
-  codeBlocks.forEach((block, index) => {
-    processedMarkdown = processedMarkdown.replace(`CODE_BLOCK_${index}`, block);
+  // 코드블록과 인라인 코드 복원
+  placeholders.forEach((code, index) => {
+    processedMarkdown = processedMarkdown.replace(`PLACEHOLDER_${index}`, code);
   });
 
   const result = await unified()
