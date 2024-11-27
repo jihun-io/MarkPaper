@@ -255,7 +255,8 @@ ipcMain.handle("window:create", () => {
   createWindow();
 });
 
-ipcMain.handle("print-to-pdf", async (event) => {
+ipcMain.handle("print-to-pdf", async (event, pageSize) => {
+  console.log("Received page size:", pageSize);
   const win = BrowserWindow.fromWebContents(event.sender);
   if (!win) return { success: false, error: "Window not found" };
 
@@ -264,13 +265,14 @@ ipcMain.handle("print-to-pdf", async (event) => {
   try {
     const data = await win.webContents.printToPDF({
       printBackground: true,
+      pageSize: typeof pageSize === "string" ? pageSize : "A4",
     });
     await fs.writeFile(pdfPath, data);
 
     const pdfWindow = new BrowserWindow({
       width: 800,
       height: 600,
-      parent: win, // 부모 창 설정
+      parent: win,
     });
     pdfWindow.title = "인쇄 및 저장";
     pdfWindow.loadURL("file://" + pdfPath);

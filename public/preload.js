@@ -6,7 +6,7 @@ console.log("preload.js가 정상적으로 로드되었습니다.");
 contextBridge.exposeInMainWorld("electronAPI", {
   createNewWindow: () => ipcRenderer.invoke("window:create"),
 
-  printToPDF: () => ipcRenderer.invoke("print-to-pdf"),
+  printToPDF: (pageSize) => ipcRenderer.invoke("print-to-pdf", pageSize),
 
   // 바이너리/텍스트 저장 지원
   saveFile: (filePath, content) =>
