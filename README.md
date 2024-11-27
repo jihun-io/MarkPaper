@@ -27,7 +27,7 @@ MarkPaper를 사용하면 마크다운의 간결함을 유지하면서도 HTML�
 3. Monaco 에디터를 사용하므로, Visual Studio Code에서 코드를 작성하는 것과 동일한 환경을 제공합니다.
 
 ## 3. 기술 스택
-- Electron, React, Zustand, Monaco 에디터
+- Electron, React, JavaScript, Zustand
 
 ## 4. 지원하는 운영체제
 - Windows
