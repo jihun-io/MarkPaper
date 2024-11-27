@@ -17,12 +17,12 @@ export const convertToHtml = async (markdown) => {
     // 코드블록 치환 (```)
     .replace(/```[\s\S]*?```/g, (match) => {
       placeholders.push(match);
-      return `PLACEHOLDER_${counter++}`;
+      return `§§PLACEHOLDER_${counter++}§§`; // 특수 구분자 추가
     })
     // 인라인 코드 치환 (`)
-    .replace(/`[^`]+`/g, (match) => {
+    .replace(/`[^`\n]+`/g, (match) => {
       placeholders.push(match);
-      return `PLACEHOLDER_${counter++}`;
+      return `§§PLACEHOLDER_${counter++}§§`; // 특수 구분자 추가
     });
 
   // 코드 외부의 pagebreak 치환
@@ -33,7 +33,10 @@ export const convertToHtml = async (markdown) => {
 
   // 코드블록과 인라인 코드 복원
   placeholders.forEach((code, index) => {
-    processedMarkdown = processedMarkdown.replace(`PLACEHOLDER_${index}`, code);
+    processedMarkdown = processedMarkdown.replace(
+      `§§PLACEHOLDER_${index}§§`, // 특수 구분자로 정확히 매칭
+      code
+    );
   });
 
   const result = await unified()
