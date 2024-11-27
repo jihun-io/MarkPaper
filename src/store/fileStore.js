@@ -4,15 +4,22 @@ import JSZip from "jszip";
 const fileUtils = {
   // 마크다운에서 실제 참조된 이미지 파일명 추출
   getReferencedImages(markdown) {
-    const regex = /!\[.*?\]\(\$(.+?)\)/g;
-    const referencedImages = new Set();
-    let match;
+    const images = new Set();
 
-    while ((match = regex.exec(markdown)) !== null) {
-      referencedImages.add(match[1]);
+    // 마크다운 이미지 패턴
+    const mdRegex = /!\[.*?\]\(\$(.+?)\)/g;
+    let match;
+    while ((match = mdRegex.exec(markdown)) !== null) {
+      images.add(match[1]);
     }
 
-    return referencedImages;
+    // HTML img 태그 패턴 (간단히)
+    const htmlRegex = /src=["']\$([^"']+)["']/g;
+    while ((match = htmlRegex.exec(markdown)) !== null) {
+      images.add(match[1]);
+    }
+
+    return images;
   },
 
   async createMPFile(content, images) {
