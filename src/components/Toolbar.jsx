@@ -73,7 +73,7 @@ export const Toolbar = ({
             className="hidden"
           />
         </div>
-        <div>
+        <div className="text-[1.25em] truncate">
           {isModified ? (
             <p>
               <span>•</span>
@@ -96,7 +96,7 @@ export const Toolbar = ({
             ))}
           </select>
           <input
-            className="p-2 h-8 flex items-center border rounded w-[4rem]"
+            className="p-2 h-8 flex items-center border rounded w-[4.5em]"
             type="number"
             min="8"
             max="72"
