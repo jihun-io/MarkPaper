@@ -95,6 +95,7 @@ export const Editor = forwardRef(
             theme="light"
             onMount={handleEditorMount}
             options={{
+              tabSize: 2,
               minimap: { enabled: false },
               fontSize: 12,
               lineNumbers: "on",
