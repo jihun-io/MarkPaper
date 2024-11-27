@@ -32,7 +32,7 @@ export default function PreviewStyles({
                 prose-thead:border-none
                 prose-th:py-0
                 prose-td:py-0
-                prose-pre:!bg-gray-100
+                prose-pre:whitespace-pre-wrap prose-pre:!bg-gray-100
                 prose-code:!text-black
                 prose-code:before:content-[''] prose-code:after:content-['']
                 after:content-[''] after:block after:opacity-0 after:w-full after:h-[100vh] after:print:hidden
