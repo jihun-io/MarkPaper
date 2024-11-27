@@ -52,6 +52,7 @@ export const schema = {
     "div",
     "p",
     "br",
+    "img",
     "svg",
     "path",
     "style",
