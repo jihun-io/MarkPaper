@@ -19,7 +19,7 @@ export default function PreviewStyles({
         className={`h-full max-h-full print:m-0 text-[12pt] prose max-w-none
                 prose-headings:font-bold
                 prose-h1:text-[1.5em] prose-h1:my-4 prose-h1:leading-[1.3]
-                prose-h2:text-[1.25em] prose-h2:mt-4 prose-h2:mb-0
+                prose-h2:text-[1.25em] prose-h2:mt-4 prose-h2:mb-4
                 prose-h3:text-[1.125em] prose-h3:mt-4 prose-h3:mb-4
                 prose-p:leading-[1.7] prose-p:my-2
                 prose-a:no-underline hover:prose-a:underline
