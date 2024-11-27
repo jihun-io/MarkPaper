@@ -2,27 +2,45 @@ import { create } from "zustand";
 import JSZip from "jszip";
 
 const fileUtils = {
+  // 마크다운에서 실제 참조된 이미지 파일명 추출
+  getReferencedImages(markdown) {
+    const regex = /!\[.*?\]\(\$(.+?)\)/g;
+    const referencedImages = new Set();
+    let match;
+
+    while ((match = regex.exec(markdown)) !== null) {
+      referencedImages.add(match[1]);
+    }
+
+    return referencedImages;
+  },
+
   async createMPFile(content, images) {
     const zip = new JSZip();
 
     // 메인 콘텐츠 저장
     zip.file("content.md", content);
 
+    // 실제 참조된 이미지만 필터링
+    const referencedImages = this.getReferencedImages(content);
+    const usedImages = images.filter(({ filename }) =>
+      referencedImages.has(filename)
+    );
+
     // 이미지 저장
-    if (images.length > 0) {
+    if (usedImages.length > 0) {
       const imageFolder = zip.folder("images");
-      for (const { filename, file } of images) {
-        // File 객체를 ArrayBuffer로 변환하여 저장
+      for (const { filename, file } of usedImages) {
         const buffer = await file.arrayBuffer();
         imageFolder.file(filename, buffer);
       }
     }
 
-    // 메타데이터 저장
+    // 메타데이터 저장 (실제 사용된 이미지만 포함)
     const metadata = {
       version: "1.0",
       lastModified: new Date().toISOString(),
-      images: images.map(({ filename }) => ({
+      images: usedImages.map(({ filename }) => ({
         name: filename,
       })),
     };
