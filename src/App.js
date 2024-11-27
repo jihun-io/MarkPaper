@@ -39,6 +39,10 @@ const App = () => {
   const { paperSize, currentFont, currentFontSize, setFont, setFontSize } =
     useStyleStore();
 
+  const currentPaperSize = PAPER_SIZES[paperSize];
+  const paperWidth = currentPaperSize.width;
+  const paperHeight = currentPaperSize.height;
+
   const {
     isOpened,
     fileName,
@@ -208,8 +212,10 @@ const App = () => {
   }, [handleLoadFile]);
 
   const handlePrint = useCallback(() => {
-    window.electronAPI.printToPDF();
-  }, []);
+    const paperSizeName = PAPER_SIZES[paperSize].name; // 현재 설정된 용지 사이즈 가져오기
+    console.log("Printing with paper size:", paperSizeName); // 로그 추가
+    window.electronAPI.printToPDF(paperSizeName);
+  }, [paperSize]);
 
   // 메뉴 바에서 파일 열기 이벤트 처리
   useEffect(() => {
@@ -376,10 +382,6 @@ const App = () => {
     setIsModified(true);
   };
 
-  const currentPaperSize = PAPER_SIZES[paperSize];
-  const paperWidth = currentPaperSize.width;
-  const paperHeight = currentPaperSize.height;
-
   if (!isOpened) {
     return (
       <div className="flex flex-col justify-around h-screen">
@@ -480,7 +482,6 @@ const App = () => {
           @page {
             size: ${paperSize.toLowerCase()};
             margin: 2cm;
-            font-size: 12pt;
             counter-increment: page;
           }
 

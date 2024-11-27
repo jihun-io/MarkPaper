@@ -16,7 +16,7 @@ export default function PreviewStyles({
       }}
     >
       <div
-        className={`h-full max-h-full print:m-0 text-[12pt] prose max-w-none
+        className={`h-full max-h-full p-[2cm] print:p-0 print:m-0 prose max-w-none
                 prose-headings:font-bold
                 prose-h1:text-[1.5em] prose-h1:my-4 prose-h1:leading-[1.3]
                 prose-h2:text-[1.25em] prose-h2:mt-4 prose-h2:mb-4
