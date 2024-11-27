@@ -3,7 +3,7 @@
 <h1 style="text-align: center;">MarkPaper</h1>
 <p style="text-align: center;">마크다운으로 시작하는 깔끔한 문서 제작</p>
 
-<img width="800" alt="image" src="https://github.com/user-attachments/assets/bb12921d-a3b5-400f-9a7d-02ef0c91f58a">
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/dd0ef010-a583-44e7-a90f-88f084da21c8" alt="MarkPaper의 스크린샷. 샘플 문서가 마크다운으로 작성되어 있고, 마크다운으로 작성된 문서가 렌더링되어 실제 문서처럼 표시되고 있다.">
 
 
 ## 1. 프로젝트 소개
@@ -15,16 +15,19 @@ MarkPaper를 사용하면 마크다운의 간결함을 유지하면서도 HTML�
 
 ## 2. 기능
 - 마크다운 문서 열기, 작성, 저장
+- 사진 첨부 및 저장
 - 페이지 나누기
 - 서체 선택 및 기본 글자 크기 설정
+- 용지 설정 (A4, A5, Letter, Legal)
 - 렌더링된 마크다운 문서 미리 보기
 - 인쇄 및 PDF 저장
 - 일부 HTML 태그 및 CSS 지원
 
 ### 2.1. 기능 상세
-1. 마크다운과 더불어 일부 HTML 코드를 지원합니다. `<div>`와 `style` 속성으로 레이아웃을 구성할 수 있습니다. HTML 코드를 작성할 때는 들여쓰기를 사용할 수 없습니다.
-2. Windows 탐색기 혹은 macOS Finder에서 `*.md` 파일을 더블 클릭하여 바로 열 수 있습니다. 연결 프로그램 설정이 필요할 수 있습니다.
-3. Monaco 에디터를 사용하므로, Visual Studio Code에서 코드를 작성하는 것과 동일한 환경을 제공합니다.
+1. MarkPaper는 기본 확장자로 `*.mp`를 사용합니다. `*.mp` 파일 내부에 사진을 저장하기 때문에 자유롭게 사진 첨부가 가능합니다. 물론, `*.md` 파일로도 저장할 수 있습니다.
+2. Windows 탐색기 혹은 macOS Finder에서 `*.mp` 혹은 `*.md` 파일을 더블 클릭하여 바로 열 수 있습니다. 연결 프로그램 설정이 필요할 수 있습니다.
+3. 마크다운과 더불어 일부 HTML 코드를 지원합니다. `<div>`와 `style` 속성으로 레이아웃을 구성할 수 있습니다. HTML 코드를 작성할 때는 들여쓰기를 사용할 수 없습니다.
+4. Monaco 에디터를 사용하므로, Visual Studio Code에서 코드를 작성하는 것과 동일한 환경을 제공합니다.
 
 ## 3. 기술 스택
 - Electron, React, JavaScript, Zustand
@@ -44,15 +47,15 @@ MarkPaper를 사용하면 마크다운의 간결함을 유지하면서도 HTML�
 ```
 
 #### 5.1.1. 이미지 삽입
-`![이미지 이름](이미지 경로)`로 이미지를 삽입할 수 있습니다. 웹 주소를 입력하여 파일을 웹에서 불러올 수 있으며, PC에 저장된 파일 경로를 입력할 수도 있습니다. 마크다운으로 추가된 이미지는 `style` 태그로 CSS에서 `img` 태그를 지정하여 스타일을 지정할 수 있지만, 개별적으로 인라인 스타일은 지정할 수 없습니다.
+`![이미지 이름](이미지 경로)`로 이미지를 삽입할 수 있습니다. 웹 주소를 입력하여 파일을 웹에서 불러올 수 있으며, PC에 저장된 파일을 '사진 삽입' 버튼 클릭 혹은 드래그 앤 드롭으로 삽입할 수도 있습니다. 마크다운으로 추가된 이미지는 `style` 태그로 CSS에서 `img` 태그를 지정하여 스타일을 지정할 수 있지만, 개별적으로 인라인 스타일은 지정할 수 없습니다.
 
 ```
-![예제 사진](https://placehold.co/600x400)
-![로컬 경로 예제 사진 (macOS)](/Users/alice/Pictures/photo.jpg)
+![첨부 경로 사진]($image.jpg)
+![웹 경로 사진](https://placehold.co/600x400)
 ```
 
 #### 5.1.2. 페이지 나누기
-또한, `---pagebreak---`로 페이지를 나눌 수 있습니다.
+`---pagebreak---` 구문으로 인쇄될 페이지를 나눌 수 있습니다. `---pagebreak---` 구문 이후에 나오는 텍스트는 다음 페이지에 이어서 출력됩니다.
 
 ```
 첫 번째 페이지입니다.
@@ -75,7 +78,7 @@ MarkPaper는 일부 HTML 문법을 지원합니다. 지원하는 태그의 목�
 MarkPaper는 `img` 태그로도 이미지를 삽입할 수 있습니다. 마크다운 문법과는 달리 개별적으로 인라인 스타일을 지정할 수 있습니다. 
 
 ```
-<img src="https://placehold.co/600x400" alt="예제 사진" width=320 style="float: left; margin-right: 1em;">
+<img src="$image.jpg" alt="예제 사진" width=320 style="float: left; margin-right: 1em;">
 ```
 
 ### 5.3. CSS
