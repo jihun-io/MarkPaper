@@ -25,6 +25,12 @@ const parseStyleTag = (content, setFont, setFontSize) => {
   }
 };
 
+// Windows와 Unix 스타일 경로 모두 처리
+function getFileName(filePath) {
+  const normalizedPath = filePath.replace(/\\/g, "/");
+  return normalizedPath.split("/").pop();
+}
+
 const App = () => {
   const {
     markdown,
@@ -79,12 +85,6 @@ const App = () => {
           : markdown;
 
         await window.electronAPI.saveFile(newFilePath, fileData);
-
-        // Windows와 Unix 스타일 경로 모두 처리
-        const getFileName = (filePath) => {
-          const normalizedPath = filePath.replace(/\\/g, "/");
-          return normalizedPath.split("/").pop();
-        };
 
         setFileName(getFileName(newFilePath));
         setIsModified(false);
@@ -229,11 +229,10 @@ const App = () => {
       return;
     }
 
-    const title = isModified
-      ? `* ${fileName || "새 문서"}`
-      : fileName || "새 문서";
+    const displayName = fileName ? getFileName(fileName) : "새 문서";
+    const title = isModified ? `${displayName} *` : displayName;
 
-    window.electronAPI.setWindowTitle(`${title}`);
+    window.electronAPI.setWindowTitle(title);
   }, [fileName, isModified, isOpened]);
 
   // 메뉴 바에서 파일 열기 이벤트 처리
