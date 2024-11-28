@@ -5,6 +5,7 @@ console.log("preload.js가 정상적으로 로드되었습니다.");
 
 contextBridge.exposeInMainWorld("electronAPI", {
   createNewWindow: () => ipcRenderer.invoke("window:create"),
+  setWindowTitle: (title) => ipcRenderer.send("update-window-title", title),
 
   printToPDF: (pageSize) => ipcRenderer.invoke("print-to-pdf", pageSize),
 

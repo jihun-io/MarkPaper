@@ -255,6 +255,14 @@ ipcMain.handle("window:create", () => {
   createWindow();
 });
 
+// 창 제목 변경 IPC 핸들러
+ipcMain.on("update-window-title", (event, title) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (win) {
+    win.setTitle(title);
+  }
+});
+
 ipcMain.handle("print-to-pdf", async (event, pageSize) => {
   console.log("Received page size:", pageSize);
   const win = BrowserWindow.fromWebContents(event.sender);

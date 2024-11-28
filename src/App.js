@@ -223,6 +223,19 @@ const App = () => {
     window.electronAPI.printToPDF(paperSizeName);
   }, [paperSize]);
 
+  useEffect(() => {
+    if (!isOpened) {
+      window.electronAPI.setWindowTitle("MarkPaper");
+      return;
+    }
+
+    const title = isModified
+      ? `* ${fileName || "새 문서"}`
+      : fileName || "새 문서";
+
+    window.electronAPI.setWindowTitle(`${title}`);
+  }, [fileName, isModified, isOpened]);
+
   // 메뉴 바에서 파일 열기 이벤트 처리
   useEffect(() => {
     window.electronAPI.onMenuOpen((filePath) => {
