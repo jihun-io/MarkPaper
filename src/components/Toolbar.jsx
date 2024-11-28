@@ -73,16 +73,6 @@ export const Toolbar = ({
             className="hidden"
           />
         </div>
-        <div className="text-[1.25em] truncate">
-          {isModified ? (
-            <p>
-              <span>•</span>
-              {fileName}
-            </p>
-          ) : (
-            <p>{fileName}</p>
-          )}
-        </div>
         <div className="flex items-center gap-4">
           <select
             value={currentFont}
