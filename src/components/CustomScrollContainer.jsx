@@ -67,7 +67,7 @@ const CustomScrollContainer = ({ children, className = "" }) => {
   }, [isDragging]);
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative print:static ${className}`}>
       <div
         ref={contentRef}
         className="h-full overflow-auto scrollbar-none"
