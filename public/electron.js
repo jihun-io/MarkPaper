@@ -270,7 +270,12 @@ ipcMain.handle("print-to-pdf", async (event, pageSize) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   if (!win) return { success: false, error: "Window not found" };
 
-  const pdfPath = path.join(app.getPath("documents"), "print.pdf");
+  // 창의 제목에서 파일명 추출
+  let fileName = win.getTitle().replace(/\s*\*$/, "");
+
+  // 파일 확장자를 .pdf로 변경
+  const pdfFileName = fileName.replace(/\.(md|mp)$/, "") + ".pdf";
+  const pdfPath = path.join(os.tmpdir(), pdfFileName);
 
   try {
     const data = await win.webContents.printToPDF({
