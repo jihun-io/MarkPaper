@@ -1,7 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog, Menu } = require("electron");
 const path = require("path");
 const fs = require("fs").promises;
-const { v4: uuidv4 } = require("uuid");
 const os = require("os");
 
 // 창 관리를 위한 배열
