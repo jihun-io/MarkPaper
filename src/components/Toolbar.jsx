@@ -7,7 +7,7 @@ import { useStyleStore } from "../store/styleStore";
 import { PAPER_SIZES, FONTS } from "../constants";
 
 const buttonClass =
-  "px-4 py-2 flex flex-col items-center gap-y-1 rounded hover:bg-arapawa-50 active:bg-arapawa-100 transition-colors";
+  "px-4 py-2 flex flex-col items-center gap-y-1 rounded hover:bg-arapawa-50 active:bg-arapawa-100 transition-colors whitespace-nowrap";
 
 export const Toolbar = ({
   onSave,
