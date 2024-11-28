@@ -3,7 +3,7 @@
 <h1 style="text-align: center;">MarkPaper</h1>
 <p style="text-align: center;">마크다운으로 시작하는 깔끔한 문서 제작</p>
 
-<img width="800" alt="image" src="https://github.com/user-attachments/assets/dd0ef010-a583-44e7-a90f-88f084da21c8" alt="MarkPaper의 스크린샷. 샘플 문서가 마크다운으로 작성되어 있고, 마크다운으로 작성된 문서가 렌더링되어 실제 문서처럼 표시되고 있다.">
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/f99989d8-41e3-4629-b174-f95f8590e54c" alt="MarkPaper의 스크린샷. 샘플 문서가 마크다운으로 작성되어 있고, 마크다운으로 작성된 문서가 렌더링되어 실제 문서처럼 표시되고 있다.">
 
 
 ## 1. 프로젝트 소개
