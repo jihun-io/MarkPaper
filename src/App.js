@@ -79,8 +79,14 @@ const App = () => {
           : markdown;
 
         await window.electronAPI.saveFile(newFilePath, fileData);
-        const newFileName = newFilePath.split("/").pop();
-        setFileName(newFileName);
+
+        // Windows와 Unix 스타일 경로 모두 처리
+        const getFileName = (filePath) => {
+          const normalizedPath = filePath.replace(/\\/g, "/");
+          return normalizedPath.split("/").pop();
+        };
+
+        setFileName(getFileName(newFilePath));
         setIsModified(false);
       }
     } catch (error) {
