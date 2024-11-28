@@ -1,6 +1,8 @@
 const { app, BrowserWindow, ipcMain, dialog, Menu } = require("electron");
 const path = require("path");
 const fs = require("fs").promises;
+const { v4: uuidv4 } = require("uuid");
+const os = require("os");
 
 // 창 관리를 위한 배열
 const windows = new Set();
@@ -282,11 +284,36 @@ ipcMain.handle("print-to-pdf", async (event, pageSize) => {
       height: 600,
       parent: win,
     });
-    pdfWindow.title = "인쇄 및 저장";
-    pdfWindow.loadURL("file://" + pdfPath);
+    // HTML viewer 페이지 로드 (PDF 경로를 쿼리 파라미터로 전달)
+    const viewerPath = path.join(__dirname, "pdfViewer.html");
+    pdfWindow.loadFile(viewerPath, {
+      query: { pdf: `file://${pdfPath}` },
+    });
+
+    // 타이틀 유지를 위해 did-finish-load 이벤트에서 다시 설정
+    pdfWindow.webContents.on("did-finish-load", () => {
+      pdfWindow.setTitle(`${fileName} - 인쇄 미리 보기`);
+    });
+
+    // PDF 윈도우가 닫힐 때 임시 파일 삭제
+    pdfWindow.on("closed", async () => {
+      try {
+        await fs.unlink(pdfPath);
+        console.log("임시 PDF 파일 삭제됨:", pdfPath);
+      } catch (err) {
+        console.error("임시 파일 삭제 실패:", err);
+      }
+    });
 
     return { success: true, path: pdfPath };
   } catch (error) {
+    // 에러 발생 시에도 임시 파일이 있다면 삭제 시도
+    try {
+      await fs.unlink(pdfPath);
+    } catch (err) {
+      // 삭제 실패는 무시
+    }
+
     console.error("PDF 생성 실패:", error);
     return { success: false, error: error.message };
   }
