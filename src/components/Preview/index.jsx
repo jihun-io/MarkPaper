@@ -1,6 +1,7 @@
 // src/components/Preview/index.jsx
 import React, { forwardRef } from "react";
 import PreviewStyles from "./PreviewStyles";
+import CustomScrollContainer from "../CustomScrollContainer";
 
 export const Preview = forwardRef(
   ({ html, paperWidth, paperHeight, paperSize }, ref) => {
@@ -13,9 +14,9 @@ export const Preview = forwardRef(
         <h2 className="text-sm flex-none font-bold my-2 print:hidden">
           미리 보기
         </h2>
-        <div className="flex-1 min-h-0 overflow-auto">
+        <CustomScrollContainer className="flex-1 min-h-0">
           <PreviewStyles paperSize={paperSize} html={html} />
-        </div>
+        </CustomScrollContainer>
       </section>
     );
   }
