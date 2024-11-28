@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PDF Viewer</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      embed {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <embed id="pdfViewer" type="application/pdf" />
+    <script>
+      // URL에서 PDF 경로를 가져와서 embed에 설정
+      const urlParams = new URLSearchParams(window.location.search);
+      const pdfPath = urlParams.get("pdf");
+      document.getElementById("pdfViewer").src = pdfPath;
+    </script>
+  </body>
+</html>
