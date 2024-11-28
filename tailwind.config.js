@@ -31,10 +31,6 @@ module.exports = {
     "flex-row",
     "justify-center",
     "items-center",
-    // pseudo-elements 관련 클래스 추가
-    {
-      pattern: /before:(content-\[.*\]|block|opacity-0)/,
-    },
     {
       pattern: /font-(thin|light|normal|medium|bold|black)/,
     },
